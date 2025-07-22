@@ -1,0 +1,3 @@
+C:\Users\axelt\Source\Repos\WEBAPI-m1IL-ALT\WEBAPI-m1IL-1\wwwroot\css\site.css
+C:\Users\axelt\Source\Repos\WEBAPI-m1IL-ALT\WEBAPI-m1IL-1\wwwroot\index.html
+C:\Users\axelt\Source\Repos\WEBAPI-m1IL-ALT\WEBAPI-m1IL-1\wwwroot\js\site.js
