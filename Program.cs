@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Text;
 using WEBAPI_m1IL_1.Models;
 using WEBAPI_m1IL_1.Services;
+using WEBAPI_m1IL_1.Controllers;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DocumentationDbContext>(options => options.UseInMemoryDatabase("TodoList"));
+builder.Services.AddMvc();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -40,7 +43,7 @@ builder.Services.AddSwaggerGen(options =>
             Email = "mail@mail.com",
             Url = new Uri("https://google.com")
         }
-
+        
     });
 
     // Ajout de la lecture des commentaires XML  
@@ -72,6 +75,10 @@ builder.Services.AddSwaggerGen(options =>
          new string[] {}
      }
  });
+
+
+
+
 });
 
 
@@ -94,7 +101,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.  
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(opt => opt.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0);
     app.UseSwaggerUI();
 }
 

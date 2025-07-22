@@ -18,6 +18,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00016" />
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00016" />
+    <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00016" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.17" />
@@ -28,7 +31,10 @@
     <PackageReference Include="Microsoft.Graph" Version="5.86.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="OpenAI" Version="2.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.3" />
   </ItemGroup>
 
 	<ItemGroup>

@@ -1,13 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WEBAPI_m1IL_1.Models;
 
 namespace WEBAPI_m1IL_1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class DocumentationController : ControllerBase
     {
-        [HttpPost("upload-zip")]
-        public async Task<IActionResult> UploadZip([FromForm] IFormFile zipFile)
+        public DocumentationController(ILogger<UploadModel> logger)
+        {
+            _logger = logger;
+        }
+        private readonly ILogger<UploadModel> _logger;
+        [HttpPost("Upload")]
+        [Consumes("application/x-www-form-urlencoded")]
+        public async Task<IActionResult> UploadZip(IFormFile zipFile)
         {
             if (zipFile == null || zipFile.Length == 0)
                 return BadRequest("Aucun fichier envoyé.");
@@ -47,7 +55,7 @@ namespace WEBAPI_m1IL_1.Controllers
             return File(fileBytes, "text/markdown", fileName);
         }
 
-        [HttpGet("search/download-md")]
+        [HttpGet("search")]
         public IActionResult FindAllPrivateMarkdownByGroup([FromQuery] string filePath)
         {
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))

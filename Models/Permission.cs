@@ -7,6 +7,7 @@
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
         public bool CanDelete { get; set; }
+        public bool isAdmin { get; set; }
         public DocumentationGroup DocumentationGroup { get; set; }
     }
 }

@@ -12,14 +12,14 @@ namespace WEBAPI_m1IL_1.Services
         {
             _context = context;
         }
-        public void AddFileToDocument()
+        public void AddFileToDocument(int documentId, string path)
         {
-           //trouver le document
-           // trouver le dossier ou crée un nouveau dossier 
-           //crée le documentFile
+            //trouver le document
+            // trouver le dossier ou crée un nouveau dossier 
+            //crée le documentFile
         }
 
-        public void ImportDocument()
+        public void ImportDocument(bool isPublic, string name, string description, string tags)
         {
 
         }
@@ -29,6 +29,11 @@ namespace WEBAPI_m1IL_1.Services
             return await _context.Documentations.FirstOrDefaultAsync(d => d.Id == id);
         }
 
+        public async Task<Documentation?> FindDocumentByName(string name)
+        {
+            return await _context.Documentations.FirstOrDefaultAsync(d => d.Title == name);
+        }
+
         public async Task<List<Documentation>> GetByTagAsync(string tag)
         {
             return await _context.Documentations
@@ -36,6 +41,28 @@ namespace WEBAPI_m1IL_1.Services
                 .ToListAsync();
         }
 
+        public async Task<Documentation> CreateDocument(string name, string description, string tags, bool isPublic)
+        {
+            var document = new Documentation
+            {
+                Title = name,
+                Description = description,
+                Tags = tags,
+                IsPublic = isPublic
+            };
+            _context.Documentations.Add(document);
+            await _context.SaveChangesAsync();
+            return document;
+        }
 
+        public async Task<List<int>> GetDocumentIdsByGroupIds(List<int> groupIds)
+        {
+            var docIds = _context.DocumentationGroups
+                .Where(gd => groupIds.Contains(gd.GroupId))
+                .Select(gd => gd.Documentation.Id)
+                .Distinct()
+                .ToList();
+            return docIds;
+        }
     }
 }
