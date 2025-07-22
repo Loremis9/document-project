@@ -14,7 +14,9 @@ namespace WEBAPI_m1IL_1.Services
         }
         public void AddFileToDocument()
         {
-           
+           //trouver le document
+           // trouver le dossier ou crée un nouveau dossier 
+           //crée le documentFile
         }
 
         public void ImportDocument()
