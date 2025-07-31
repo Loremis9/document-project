@@ -17,6 +17,8 @@ C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\WEBAPI-m1IL-1.
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\WEBAPI-m1IL-1.xml
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Csv.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\CsvHelper.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Humanizer.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\J2N.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Lucene.Net.dll
@@ -97,6 +99,13 @@ C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\NuGet.ProjectM
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\NuGet.Protocol.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\NuGet.Versioning.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\OpenAI.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.Core.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.DocumentLayoutAnalysis.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.Fonts.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.Package.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.Tokenization.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.Tokens.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\UglyToad.PdfPig.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Scrutor.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Std.UriTemplate.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Swashbuckle.AspNetCore.Annotations.dll
@@ -288,3 +297,6 @@ C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\WEBAPI-m1IL-1.
 C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\WEBAPI-m1IL-1.pdb
 C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\WEBAPI-m1IL-1.genruntimeconfig.cache
 C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\ref\WEBAPI-m1IL-1.dll
+C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Lucene.Net.Highlighter.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Lucene.Net.Memory.dll

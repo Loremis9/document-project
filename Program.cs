@@ -34,13 +34,13 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Version = "V1",
-        Title = "Todo API",
-        Description = "Mon API de todo List",
+        Title = "docmentation API",
+        Description = "Mon API de documentation permettant de tranformer un documentation en markdown et de la distribuer",
         TermsOfService = new Uri("https://google.com"),
         Contact = new Microsoft.OpenApi.Models.OpenApiContact
         {
-            Name = "Thomas BDC",
-            Email = "mail@mail.com",
+            Name = "axel teyssier",
+            Email = "axel.teyssier31@mail.com",
             Url = new Uri("https://google.com")
         }
         
@@ -81,7 +81,7 @@ builder.Services.AddSwaggerGen(options =>
 
 });
 
-
+builder.Services.AddSingleton<LuceneSearchService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
 {
@@ -95,7 +95,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 IHttpClientBuilder httpClientBuilder = builder.Services.AddHttpClient<IChatGptMarkdownFormatterService, AIService>();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.  

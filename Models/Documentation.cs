@@ -8,7 +8,7 @@
         public string Description { get; set; }
         public string RootPath { get; set; }
         public bool IsPublic { get; set; }
-        public ICollection<DocumentationGroup> DocumentationGroups { get; set; }
         public ICollection<DocumentationFile> DocumentationFiles { get; set; }
+        public ICollection<UserPermission> UserPermissions { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WEBAPI_m1IL_1.Models;
+using WEBAPI_m1IL_1.Services;
 
 namespace WEBAPI_m1IL_1.Controllers
 {
@@ -13,10 +14,11 @@ namespace WEBAPI_m1IL_1.Controllers
     public class LoginController : ControllerBase
     {
         private IConfiguration _configuration;
-
-        public LoginController(IConfiguration configuration)
+        private UserService userService;
+        public LoginController(IConfiguration configuration,UserService userService)
         {
             _configuration = configuration;
+            this.userService = userService;
         }
 
         [HttpPost]
@@ -42,18 +44,16 @@ namespace WEBAPI_m1IL_1.Controllers
 
             var security = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var credentials = new SigningCredentials(security, SecurityAlgorithms.HmacSha256);
-
             //Choisir les informations à mettre dans le token (claims)
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, userLogin.UserName),
-                new Claim("Coucou", "value")
+                new Claim(ClaimTypes.NameIdentifier, userLogin.UserId.ToString()),
             };
 
             //Générer le token 
             var token = new JwtSecurityToken(
                       claims: claims,
-                      expires: DateTime.Now.AddMinutes(15),
+                      expires: DateTime.Now.AddMinutes(30),
                       signingCredentials: credentials
                 );
 
@@ -66,7 +66,7 @@ namespace WEBAPI_m1IL_1.Controllers
             var allUsers = UserConstants.Users;
 
             var userExist = from user in allUsers
-                            where user.Username.ToLower() == userLogin.UserName.ToLower()
+                            where user.Id == userLogin.UserId
                                 && user.Password == userLogin.Password
                             select user;
 

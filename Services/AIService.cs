@@ -6,18 +6,47 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.Graph;
 using OpenAI;
+using System.Collections.Concurrent;
+using WEBAPI_m1IL_1.Utils;
 namespace WEBAPI_m1IL_1.Services
 {
+    public class OllamaAnswer
+{
+    public string Answer { get; set; }
+    public List<int> DocumentationIds { get; set; }
+}
     public class AIService : IChatGptMarkdownFormatterService
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey = "YOUR_OPENAI_API_KEY";
-        private const string Endpoint = "https://api.openai.com/v1/chat/completions";
+        private const string Endpoint = "";
+        private const string EndpointOllama = "http://localhost:11434";
+        private readonly ConcurrentDictionary<string, byte[]> _userContexts;
 
         public AIService(HttpClient httpClient)
         {
             _httpClient = httpClient;
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            _userContexts = new ConcurrentDictionary<string, byte[]>();
+
+        }
+        //Poser une question à l'utilsateur concernant ça demande ( avoir plus de précision)
+        public async Task<string> AskAi(int userId,string? content,string ask, string? question,string? contextId){
+            if(!string.IsNullOrWhiteSpace(contextId)){
+                contextId = SampleUtils.GenerateUUID();
+            }
+            switch(ask){
+                case "tag":
+                return await SendToAi($"{AiPrompts.tags} :\n{content}",userId,contextId);
+                case "search" :  
+                return await SendToAi($"{AiPrompts.SearchPrompt} :\n{content}",userId,contextId);
+                case "convert" :  
+                return await SendToAi($"{AiPrompts.ConvertToMarkdownPrompt}  :\n{content}",userId,contextId);
+                case "reformule":   
+                return await SendToAi($"{AiPrompts.reformule} : ${question}",userId,contextId);
+                default:
+                return null;
+            }
         }
 
         public async Task<string> FormatAsMarkdownAsync(string plainText)
@@ -49,5 +78,28 @@ namespace WEBAPI_m1IL_1.Services
                 .GetProperty("content")
                 .GetString();
         }
+        public async Task<string> SendToAi(string prompt,int userId,string contextId)
+        {
+            _userContexts.TryGetValue(userId.ToString(), out var context);
+
+            var payload = new
+            {
+                model = "mistral", // modèle téléchargé
+                prompt = prompt,
+                context = context + contextId, // Injecte le contexte précédent
+                stream = false // pour récupérer toute la réponse d'un coup
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(Endpoint, content);
+            response.EnsureSuccessStatusCode();
+
+            var responseString = await response.Content.ReadAsStringAsync();
+             var ollamaResponse = JsonSerializer.Deserialize<OllamaAnswer>(responseString);
+            return ollamaResponse?.Answer ?? string.Empty;
     }
+
+
+}
 }

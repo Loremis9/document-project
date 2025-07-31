@@ -47,6 +47,32 @@
           }
         }
       },
+      "Csv/2.0.170": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Csv.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Csv.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "CsvHelper/33.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/CsvHelper.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/CsvHelper.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Humanizer/2.14.1": {
         "type": "package",
         "dependencies": {
@@ -641,32 +667,32 @@
           }
         }
       },
-      "J2N/2.0.0": {
+      "J2N/2.1.0": {
         "type": "package",
         "compile": {
-          "lib/net6.0/J2N.dll": {
+          "lib/net8.0/J2N.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/J2N.dll": {
+          "lib/net8.0/J2N.dll": {
             "related": ".xml"
           }
         }
       },
-      "Lucene.Net/4.8.0-beta00016": {
+      "Lucene.Net/4.8.0-beta00017": {
         "type": "package",
         "dependencies": {
-          "J2N": "2.0.0",
-          "Microsoft.Extensions.Configuration.Abstractions": "2.0.0"
+          "J2N": "[2.1.0, 3.0.0)",
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0"
         },
         "compile": {
-          "lib/net6.0/Lucene.Net.dll": {
+          "lib/net8.0/Lucene.Net.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/Lucene.Net.dll": {
+          "lib/net8.0/Lucene.Net.dll": {
             "related": ".xml"
           }
         }
@@ -687,18 +713,51 @@
           }
         }
       },
-      "Lucene.Net.Queries/4.8.0-beta00016": {
+      "Lucene.Net.Highlighter/4.8.0-beta00017": {
         "type": "package",
         "dependencies": {
-          "Lucene.Net": "4.8.0-beta00016"
+          "Lucene.Net.Memory": "4.8.0-beta00017",
+          "Lucene.Net.Queries": "4.8.0-beta00017"
         },
         "compile": {
-          "lib/net6.0/Lucene.Net.Queries.dll": {
+          "lib/net8.0/Lucene.Net.Highlighter.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/Lucene.Net.Queries.dll": {
+          "lib/net8.0/Lucene.Net.Highlighter.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Lucene.Net.Memory/4.8.0-beta00017": {
+        "type": "package",
+        "dependencies": {
+          "Lucene.Net": "4.8.0-beta00017"
+        },
+        "compile": {
+          "lib/net8.0/Lucene.Net.Memory.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Lucene.Net.Memory.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Lucene.Net.Queries/4.8.0-beta00017": {
+        "type": "package",
+        "dependencies": {
+          "Lucene.Net": "4.8.0-beta00017"
+        },
+        "compile": {
+          "lib/net8.0/Lucene.Net.Queries.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Lucene.Net.Queries.dll": {
             "related": ".xml"
           }
         }
@@ -2358,6 +2417,55 @@
           }
         }
       },
+      "PdfPig/0.1.11": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/UglyToad.PdfPig.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.DocumentLayoutAnalysis.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Fonts.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Package.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Tokenization.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Tokens.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.dll": {
+            "related": ".Core.pdb;.Core.xml;.DocumentLayoutAnalysis.pdb;.DocumentLayoutAnalysis.xml;.Fonts.pdb;.Fonts.xml;.Package.pdb;.Package.xml;.pdb;.Tokenization.pdb;.Tokenization.xml;.Tokens.pdb;.Tokens.xml;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/UglyToad.PdfPig.Core.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.DocumentLayoutAnalysis.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Fonts.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Package.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Tokenization.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.Tokens.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/UglyToad.PdfPig.dll": {
+            "related": ".Core.pdb;.Core.xml;.DocumentLayoutAnalysis.pdb;.DocumentLayoutAnalysis.xml;.Fonts.pdb;.Fonts.xml;.Package.pdb;.Package.xml;.pdb;.Tokenization.pdb;.Tokenization.xml;.Tokens.pdb;.Tokens.xml;.xml"
+          }
+        }
+      },
       "Scrutor/3.3.0": {
         "type": "package",
         "dependencies": {
@@ -3189,6 +3297,51 @@
         "lib/netstandard2.0/Azure.Identity.xml"
       ]
     },
+    "Csv/2.0.170": {
+      "sha512": "cwnjv33sayBzn54DFXGKHyLHkU1gXMV3IwFz0GfLy7cDwfqQXocg6on57g3A61UxMfpmD+njEwRCdUWpfs45iw==",
+      "type": "package",
+      "path": "csv/2.0.170",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "csv.2.0.170.nupkg.sha512",
+        "csv.nuspec",
+        "icon.png",
+        "lib/net8.0/Csv.dll",
+        "lib/net8.0/Csv.xml",
+        "lib/net9.0/Csv.dll",
+        "lib/net9.0/Csv.xml",
+        "lib/netstandard2.0/Csv.dll",
+        "lib/netstandard2.0/Csv.xml"
+      ]
+    },
+    "CsvHelper/33.1.0": {
+      "sha512": "kqfTOZGrn7NarNeXgjh86JcpTHUoeQDMB8t9NVa/ZtlSYiV1rxfRnQ49WaJsob4AiGrbK0XDzpyKkBwai4F8eg==",
+      "type": "package",
+      "path": "csvhelper/33.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "csvhelper.33.1.0.nupkg.sha512",
+        "csvhelper.nuspec",
+        "lib/net462/CsvHelper.dll",
+        "lib/net462/CsvHelper.xml",
+        "lib/net47/CsvHelper.dll",
+        "lib/net47/CsvHelper.xml",
+        "lib/net48/CsvHelper.dll",
+        "lib/net48/CsvHelper.xml",
+        "lib/net8.0/CsvHelper.dll",
+        "lib/net8.0/CsvHelper.xml",
+        "lib/net9.0/CsvHelper.dll",
+        "lib/net9.0/CsvHelper.xml",
+        "lib/netstandard2.0/CsvHelper.dll",
+        "lib/netstandard2.0/CsvHelper.xml",
+        "lib/netstandard2.1/CsvHelper.dll",
+        "lib/netstandard2.1/CsvHelper.xml"
+      ]
+    },
     "Humanizer/2.14.1": {
       "sha512": "/FUTD3cEceAAmJSCPN9+J+VhGwmL/C12jvwlyM1DFXShEMsBzvLzLqSrJ2rb+k/W2znKw7JyflZgZpyE+tI7lA==",
       "type": "package",
@@ -3935,27 +4088,27 @@
         "logo.png"
       ]
     },
-    "J2N/2.0.0": {
-      "sha512": "M5bwDajAARZiyqupU+rHQJnsVLxNBOHJ8vKYHd8LcLIb1FgLfzzcJvc31Qo5Xz/GEHFjDF9ScjKL/ks/zRTXuA==",
+    "J2N/2.1.0": {
+      "sha512": "Vooz1wbnnqWuS+u93tADXK5Owxo8vLJhSrZ9Ac+KpgDF3GJq9TybXXTF1TFcWILgEtRThc8AOBENEzB0TQH1JA==",
       "type": "package",
-      "path": "j2n/2.0.0",
+      "path": "j2n/2.1.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.txt",
         "j2n-icon-100x100.png",
-        "j2n.2.0.0.nupkg.sha512",
+        "j2n.2.1.0.nupkg.sha512",
         "j2n.nuspec",
         "lib/net40/J2N.dll",
         "lib/net40/J2N.xml",
         "lib/net45/J2N.dll",
         "lib/net45/J2N.xml",
-        "lib/net5.0/J2N.dll",
-        "lib/net5.0/J2N.xml",
+        "lib/net462/J2N.dll",
+        "lib/net462/J2N.xml",
         "lib/net6.0/J2N.dll",
         "lib/net6.0/J2N.xml",
-        "lib/netcoreapp3.0/J2N.dll",
-        "lib/netcoreapp3.0/J2N.xml",
+        "lib/net8.0/J2N.dll",
+        "lib/net8.0/J2N.xml",
         "lib/netstandard2.0/J2N.dll",
         "lib/netstandard2.0/J2N.xml",
         "lib/netstandard2.1/J2N.dll",
@@ -3963,10 +4116,10 @@
         "readme.md"
       ]
     },
-    "Lucene.Net/4.8.0-beta00016": {
-      "sha512": "DCtUbE/NIrisNI7hRwU+UKS3Cr6S2vH1XB9wvEHHI3anu5OUpX1Fkr/PDC7oFCaol/QCvzVLbLZVizAT1aTLpA==",
+    "Lucene.Net/4.8.0-beta00017": {
+      "sha512": "7LLWS9nNwx01AyE/KXMh+qdAlzDkRANE8407AO/wEmLL1InzVKFwfsRdRmwg4ILOMFui4xZ1Y54eqvzo3Tf9Vw==",
       "type": "package",
-      "path": "lucene.net/4.8.0-beta00016",
+      "path": "lucene.net/4.8.0-beta00017",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
@@ -3975,16 +4128,18 @@
         "NOTICE.txt",
         "analyzers/dotnet/cs/Lucene.Net.CodeAnalysis.CSharp.dll",
         "analyzers/dotnet/vb/Lucene.Net.CodeAnalysis.VisualBasic.dll",
-        "lib/net45/Lucene.Net.dll",
-        "lib/net45/Lucene.Net.xml",
+        "lib/net462/Lucene.Net.dll",
+        "lib/net462/Lucene.Net.xml",
         "lib/net6.0/Lucene.Net.dll",
         "lib/net6.0/Lucene.Net.xml",
+        "lib/net8.0/Lucene.Net.dll",
+        "lib/net8.0/Lucene.Net.xml",
         "lib/netstandard2.0/Lucene.Net.dll",
         "lib/netstandard2.0/Lucene.Net.xml",
         "lib/netstandard2.1/Lucene.Net.dll",
         "lib/netstandard2.1/Lucene.Net.xml",
         "lucene-net-icon-128x128.png",
-        "lucene.net.4.8.0-beta00016.nupkg.sha512",
+        "lucene.net.4.8.0-beta00017.nupkg.sha512",
         "lucene.net.nuspec",
         "tools/install.ps1",
         "tools/uninstall.ps1"
@@ -4012,25 +4167,75 @@
         "lucene.net.analysis.common.nuspec"
       ]
     },
-    "Lucene.Net.Queries/4.8.0-beta00016": {
-      "sha512": "XBzdMDlan68V2ZlhAlP8Fd+Xx2Le8ec7cEN1kFF45Sipa3Q8L/tilJfwS9VHvMTvGkwPM/yj62eGbfGBgIMR8Q==",
+    "Lucene.Net.Highlighter/4.8.0-beta00017": {
+      "sha512": "Mqm+KlBHhNO+jhmSkC1xD88qSAWEcFu7vGt7utpoZZn9RGD5TVXavJHNLXYjvj9O5NQtDAjeKZ0T9toVCY0REw==",
       "type": "package",
-      "path": "lucene.net.queries/4.8.0-beta00016",
+      "path": "lucene.net.highlighter/4.8.0-beta00017",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.txt",
         "NOTICE.txt",
-        "lib/net45/Lucene.Net.Queries.dll",
-        "lib/net45/Lucene.Net.Queries.xml",
+        "lib/net462/Lucene.Net.Highlighter.dll",
+        "lib/net462/Lucene.Net.Highlighter.xml",
+        "lib/net6.0/Lucene.Net.Highlighter.dll",
+        "lib/net6.0/Lucene.Net.Highlighter.xml",
+        "lib/net8.0/Lucene.Net.Highlighter.dll",
+        "lib/net8.0/Lucene.Net.Highlighter.xml",
+        "lib/netstandard2.0/Lucene.Net.Highlighter.dll",
+        "lib/netstandard2.0/Lucene.Net.Highlighter.xml",
+        "lib/netstandard2.1/Lucene.Net.Highlighter.dll",
+        "lib/netstandard2.1/Lucene.Net.Highlighter.xml",
+        "lucene-net-icon-128x128.png",
+        "lucene.net.highlighter.4.8.0-beta00017.nupkg.sha512",
+        "lucene.net.highlighter.nuspec"
+      ]
+    },
+    "Lucene.Net.Memory/4.8.0-beta00017": {
+      "sha512": "T4uG0k1iGzXXRRlmsFTtRPhnc2Ef1wlh68TxO2dN8qLW7AXX9qsIjOuN64+IXAPUkysvvks8psoU6epi642MUw==",
+      "type": "package",
+      "path": "lucene.net.memory/4.8.0-beta00017",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "NOTICE.txt",
+        "lib/net462/Lucene.Net.Memory.dll",
+        "lib/net462/Lucene.Net.Memory.xml",
+        "lib/net6.0/Lucene.Net.Memory.dll",
+        "lib/net6.0/Lucene.Net.Memory.xml",
+        "lib/net8.0/Lucene.Net.Memory.dll",
+        "lib/net8.0/Lucene.Net.Memory.xml",
+        "lib/netstandard2.0/Lucene.Net.Memory.dll",
+        "lib/netstandard2.0/Lucene.Net.Memory.xml",
+        "lib/netstandard2.1/Lucene.Net.Memory.dll",
+        "lib/netstandard2.1/Lucene.Net.Memory.xml",
+        "lucene-net-icon-128x128.png",
+        "lucene.net.memory.4.8.0-beta00017.nupkg.sha512",
+        "lucene.net.memory.nuspec"
+      ]
+    },
+    "Lucene.Net.Queries/4.8.0-beta00017": {
+      "sha512": "RVpZCfa/7pgvytFw64zLqinvZPQt4TojvcFghdAA5vhnpSs5GTbtciPIxFH3wwH3f2dYJywiqYKo1h3JBCXRBA==",
+      "type": "package",
+      "path": "lucene.net.queries/4.8.0-beta00017",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "NOTICE.txt",
+        "lib/net462/Lucene.Net.Queries.dll",
+        "lib/net462/Lucene.Net.Queries.xml",
         "lib/net6.0/Lucene.Net.Queries.dll",
         "lib/net6.0/Lucene.Net.Queries.xml",
+        "lib/net8.0/Lucene.Net.Queries.dll",
+        "lib/net8.0/Lucene.Net.Queries.xml",
         "lib/netstandard2.0/Lucene.Net.Queries.dll",
         "lib/netstandard2.0/Lucene.Net.Queries.xml",
         "lib/netstandard2.1/Lucene.Net.Queries.dll",
         "lib/netstandard2.1/Lucene.Net.Queries.xml",
         "lucene-net-icon-128x128.png",
-        "lucene.net.queries.4.8.0-beta00016.nupkg.sha512",
+        "lucene.net.queries.4.8.0-beta00017.nupkg.sha512",
         "lucene.net.queries.nuspec"
       ]
     },
@@ -7138,6 +7343,124 @@
         "openai.nuspec"
       ]
     },
+    "PdfPig/0.1.11": {
+      "sha512": "pGAhccH2pXU5SzNPs94kGD+HnChHWrW/234en2Ky+RSAAui4o7msOiUdePErOmM2FY/wnyfj3MY/WRAhjnlRVw==",
+      "type": "package",
+      "path": "pdfpig/0.1.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net462/UglyToad.PdfPig.Core.dll",
+        "lib/net462/UglyToad.PdfPig.Core.pdb",
+        "lib/net462/UglyToad.PdfPig.Core.xml",
+        "lib/net462/UglyToad.PdfPig.DocumentLayoutAnalysis.dll",
+        "lib/net462/UglyToad.PdfPig.DocumentLayoutAnalysis.pdb",
+        "lib/net462/UglyToad.PdfPig.DocumentLayoutAnalysis.xml",
+        "lib/net462/UglyToad.PdfPig.Fonts.dll",
+        "lib/net462/UglyToad.PdfPig.Fonts.pdb",
+        "lib/net462/UglyToad.PdfPig.Fonts.xml",
+        "lib/net462/UglyToad.PdfPig.Package.dll",
+        "lib/net462/UglyToad.PdfPig.Package.pdb",
+        "lib/net462/UglyToad.PdfPig.Package.xml",
+        "lib/net462/UglyToad.PdfPig.Tokenization.dll",
+        "lib/net462/UglyToad.PdfPig.Tokenization.pdb",
+        "lib/net462/UglyToad.PdfPig.Tokenization.xml",
+        "lib/net462/UglyToad.PdfPig.Tokens.dll",
+        "lib/net462/UglyToad.PdfPig.Tokens.pdb",
+        "lib/net462/UglyToad.PdfPig.Tokens.xml",
+        "lib/net462/UglyToad.PdfPig.dll",
+        "lib/net462/UglyToad.PdfPig.pdb",
+        "lib/net462/UglyToad.PdfPig.xml",
+        "lib/net471/UglyToad.PdfPig.Core.dll",
+        "lib/net471/UglyToad.PdfPig.Core.pdb",
+        "lib/net471/UglyToad.PdfPig.Core.xml",
+        "lib/net471/UglyToad.PdfPig.DocumentLayoutAnalysis.dll",
+        "lib/net471/UglyToad.PdfPig.DocumentLayoutAnalysis.pdb",
+        "lib/net471/UglyToad.PdfPig.DocumentLayoutAnalysis.xml",
+        "lib/net471/UglyToad.PdfPig.Fonts.dll",
+        "lib/net471/UglyToad.PdfPig.Fonts.pdb",
+        "lib/net471/UglyToad.PdfPig.Fonts.xml",
+        "lib/net471/UglyToad.PdfPig.Package.dll",
+        "lib/net471/UglyToad.PdfPig.Package.pdb",
+        "lib/net471/UglyToad.PdfPig.Package.xml",
+        "lib/net471/UglyToad.PdfPig.Tokenization.dll",
+        "lib/net471/UglyToad.PdfPig.Tokenization.pdb",
+        "lib/net471/UglyToad.PdfPig.Tokenization.xml",
+        "lib/net471/UglyToad.PdfPig.Tokens.dll",
+        "lib/net471/UglyToad.PdfPig.Tokens.pdb",
+        "lib/net471/UglyToad.PdfPig.Tokens.xml",
+        "lib/net471/UglyToad.PdfPig.dll",
+        "lib/net471/UglyToad.PdfPig.pdb",
+        "lib/net471/UglyToad.PdfPig.xml",
+        "lib/net6.0/UglyToad.PdfPig.Core.dll",
+        "lib/net6.0/UglyToad.PdfPig.Core.pdb",
+        "lib/net6.0/UglyToad.PdfPig.Core.xml",
+        "lib/net6.0/UglyToad.PdfPig.DocumentLayoutAnalysis.dll",
+        "lib/net6.0/UglyToad.PdfPig.DocumentLayoutAnalysis.pdb",
+        "lib/net6.0/UglyToad.PdfPig.DocumentLayoutAnalysis.xml",
+        "lib/net6.0/UglyToad.PdfPig.Fonts.dll",
+        "lib/net6.0/UglyToad.PdfPig.Fonts.pdb",
+        "lib/net6.0/UglyToad.PdfPig.Fonts.xml",
+        "lib/net6.0/UglyToad.PdfPig.Package.dll",
+        "lib/net6.0/UglyToad.PdfPig.Package.pdb",
+        "lib/net6.0/UglyToad.PdfPig.Package.xml",
+        "lib/net6.0/UglyToad.PdfPig.Tokenization.dll",
+        "lib/net6.0/UglyToad.PdfPig.Tokenization.pdb",
+        "lib/net6.0/UglyToad.PdfPig.Tokenization.xml",
+        "lib/net6.0/UglyToad.PdfPig.Tokens.dll",
+        "lib/net6.0/UglyToad.PdfPig.Tokens.pdb",
+        "lib/net6.0/UglyToad.PdfPig.Tokens.xml",
+        "lib/net6.0/UglyToad.PdfPig.dll",
+        "lib/net6.0/UglyToad.PdfPig.pdb",
+        "lib/net6.0/UglyToad.PdfPig.xml",
+        "lib/net8.0/UglyToad.PdfPig.Core.dll",
+        "lib/net8.0/UglyToad.PdfPig.Core.pdb",
+        "lib/net8.0/UglyToad.PdfPig.Core.xml",
+        "lib/net8.0/UglyToad.PdfPig.DocumentLayoutAnalysis.dll",
+        "lib/net8.0/UglyToad.PdfPig.DocumentLayoutAnalysis.pdb",
+        "lib/net8.0/UglyToad.PdfPig.DocumentLayoutAnalysis.xml",
+        "lib/net8.0/UglyToad.PdfPig.Fonts.dll",
+        "lib/net8.0/UglyToad.PdfPig.Fonts.pdb",
+        "lib/net8.0/UglyToad.PdfPig.Fonts.xml",
+        "lib/net8.0/UglyToad.PdfPig.Package.dll",
+        "lib/net8.0/UglyToad.PdfPig.Package.pdb",
+        "lib/net8.0/UglyToad.PdfPig.Package.xml",
+        "lib/net8.0/UglyToad.PdfPig.Tokenization.dll",
+        "lib/net8.0/UglyToad.PdfPig.Tokenization.pdb",
+        "lib/net8.0/UglyToad.PdfPig.Tokenization.xml",
+        "lib/net8.0/UglyToad.PdfPig.Tokens.dll",
+        "lib/net8.0/UglyToad.PdfPig.Tokens.pdb",
+        "lib/net8.0/UglyToad.PdfPig.Tokens.xml",
+        "lib/net8.0/UglyToad.PdfPig.dll",
+        "lib/net8.0/UglyToad.PdfPig.pdb",
+        "lib/net8.0/UglyToad.PdfPig.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.Core.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.Core.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.Core.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.DocumentLayoutAnalysis.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.DocumentLayoutAnalysis.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.DocumentLayoutAnalysis.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.Fonts.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.Fonts.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.Fonts.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.Package.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.Package.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.Package.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.Tokenization.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.Tokenization.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.Tokenization.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.Tokens.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.Tokens.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.Tokens.xml",
+        "lib/netstandard2.0/UglyToad.PdfPig.dll",
+        "lib/netstandard2.0/UglyToad.PdfPig.pdb",
+        "lib/netstandard2.0/UglyToad.PdfPig.xml",
+        "pdfpig.0.1.11.nupkg.sha512",
+        "pdfpig.nuspec",
+        "pdfpig.png"
+      ]
+    },
     "Scrutor/3.3.0": {
       "sha512": "BwqCnFzp2/Z+pq17iztxlIkR/ZANyPRR4PdE57WL1w/JW4AM/2imoxBWTL3+G+YXA46ce4s9OUgwWqTXYrtI8A==",
       "type": "package",
@@ -8447,8 +8770,11 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "Lucene.Net >= 4.8.0-beta00016",
+      "Csv >= 2.0.170",
+      "CsvHelper >= 33.1.0",
+      "Lucene.Net >= 4.8.0-beta00017",
       "Lucene.Net.Analysis.Common >= 4.8.0-beta00016",
+      "Lucene.Net.Highlighter >= 4.8.0-beta00017",
       "Lucene.Net.QueryParser >= 4.8.0-beta00016",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.18",
       "Microsoft.EntityFrameworkCore.InMemory >= 8.0.17",
@@ -8457,6 +8783,7 @@
       "Microsoft.Graph >= 5.86.0",
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 8.0.7",
       "OpenAI >= 2.2.0",
+      "PdfPig >= 0.1.11",
       "Swashbuckle.AspNetCore >= 9.0.3",
       "Swashbuckle.AspNetCore.Annotations >= 9.0.3",
       "Swashbuckle.AspNetCore.Filters >= 9.0.0",
@@ -8513,13 +8840,25 @@
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
+          "Csv": {
+            "target": "Package",
+            "version": "[2.0.170, )"
+          },
+          "CsvHelper": {
+            "target": "Package",
+            "version": "[33.1.0, )"
+          },
           "Lucene.Net": {
             "target": "Package",
-            "version": "[4.8.0-beta00016, )"
+            "version": "[4.8.0-beta00017, )"
           },
           "Lucene.Net.Analysis.Common": {
             "target": "Package",
             "version": "[4.8.0-beta00016, )"
+          },
+          "Lucene.Net.Highlighter": {
+            "target": "Package",
+            "version": "[4.8.0-beta00017, )"
           },
           "Lucene.Net.QueryParser": {
             "target": "Package",
@@ -8554,6 +8893,10 @@
           "OpenAI": {
             "target": "Package",
             "version": "[2.2.0, )"
+          },
+          "PdfPig": {
+            "target": "Package",
+            "version": "[0.1.11, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",

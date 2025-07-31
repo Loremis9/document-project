@@ -1,0 +1,138 @@
+using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Util;
+using Lucene.Net.Search;
+using Lucene.Net.QueryParsers.Classic;
+using WEBAPI_m1IL_1.Models;
+using Lucene.Net.Store;
+using Lucene.Net.Search.Highlight;
+using WEBAPI_m1IL_1.Utils;
+using System.IO;
+namespace WEBAPI_m1IL_1.Services
+{
+    public class LuceneSearchService
+    {
+        private readonly Lucene.Net.Store.Directory _directory;
+        private readonly StandardAnalyzer _analyzer;
+        private readonly string _indexPath;
+        private readonly LuceneVersion _version = LuceneVersion.LUCENE_48;
+        private AIService aiService;
+        const int maxChunkSize = 5000; // caractères max par chunk
+
+        public LuceneSearchService()
+        {
+            _indexPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "LuceneIndex");
+            System.IO.Directory.CreateDirectory(_indexPath);
+            _directory = Lucene.Net.Store.FSDirectory.Open(_indexPath);
+            _analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
+        }
+
+        public void IndexDocument(Documentation doc)
+        {
+            using var writer = new IndexWriter(_directory, new IndexWriterConfig(LuceneVersion.LUCENE_48, _analyzer));
+            var document = new Document
+        {
+            new StringField("Id", doc.Id.ToString(), Field.Store.YES),
+            new TextField("Title", doc.Title ?? "", Field.Store.YES),
+            new TextField("Description", doc.Description ?? "", Field.Store.YES),
+            new TextField("Tags", doc.Tags ?? "", Field.Store.YES),
+            new StringField("IsPublic", doc.IsPublic.ToString().ToLower(), Field.Store.YES)
+
+        };
+
+            writer.AddDocument(document);
+            writer.Commit();
+        }
+            public void IndexDocumentFile(DocumentationFile documentFile, string path)
+            {
+                var indexConfig = new IndexWriterConfig(_version, _analyzer);
+                using var writer = new IndexWriter(_directory, new IndexWriterConfig(LuceneVersion.LUCENE_48, _analyzer));
+
+                // Supprimer les anciens chunks liés à ce docId
+                writer.DeleteDocuments(new Term("documentFileId", documentFile.Id.ToString()));
+                var chunkNumber = 0;
+                foreach (var chunk in SampleUtils.ChunkString(FilesUtils.ReadFile(path), maxChunkSize))
+                {
+                    var doc = new Document
+                    {
+                        new StringField("documentId", documentFile.DocumentationId.ToString(), Field.Store.YES),
+                        new StringField("documentFileId", documentFile.Id.ToString(), Field.Store.YES),
+                        new Int32Field("ChunkNumber", chunkNumber, Field.Store.YES),
+                        new TextField("Content", chunk, Field.Store.YES)
+                    };
+                    if (!string.IsNullOrWhiteSpace(documentFile.Tags))
+                    {
+                        var tagsArray = documentFile.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var tag in tagsArray)
+                        {
+                            doc.Add(new StringField("Tag", tag.Trim().ToLower(), Field.Store.YES));
+                        }
+                    }
+                    writer.AddDocument(doc);
+                    chunkNumber++;
+                }
+                writer.Flush(triggerMerge: false, applyAllDeletes: false);
+            }
+
+
+        public List<(int DocId, string Snippet)> SearchWithHighlights(string queryText, int documentationId,string? tags)
+        {
+            int maxResults = 20;
+            using var reader = DirectoryReader.Open(_directory);
+            var searcher = new IndexSearcher(reader);
+            var parser = new QueryParser(_version, "Content", _analyzer);
+            var query = parser.Parse(queryText);
+            var booleanQuery = new BooleanQuery
+            {
+                { query, Occur.MUST }
+            };
+
+
+            var docIdQuery = new TermQuery(new Term("DocumentationId", documentationId.ToString()));
+            booleanQuery.Add(docIdQuery, Occur.MUST);
+            var IsPublicQuery = new TermQuery(new Term("isPublic", false.ToString()));
+            booleanQuery.Add(IsPublicQuery, Occur.MUST);
+
+            if (!string.IsNullOrWhiteSpace(tags) && tags.Any())
+            {
+                var tagsQuery = new BooleanQuery();
+                foreach (var tag in tags)
+                {
+                    tagsQuery.Add(new TermQuery(new Term("Tag", tags.Trim().ToLower())), Occur.SHOULD);
+                }
+                booleanQuery.Add(tagsQuery, Occur.MUST);
+            }
+            var hits = searcher.Search(query, maxResults).ScoreDocs;
+
+            var results = new List<(int, string)>();
+
+            var scorer = new QueryScorer(query);
+            var formatter = new SimpleHTMLFormatter("<b>", "</b>");
+            var highlighter = new Highlighter(formatter, scorer);
+            highlighter.TextFragmenter = new SimpleFragmenter(100); // taille max fragment
+
+            foreach (var hit in hits)
+            {
+                var doc = searcher.Doc(hit.Doc);
+                int id = int.Parse(doc.Get("Id"));
+                string content = doc.Get("Content");
+
+                // TokenStream pour le contenu
+                using var tokenStream = _analyzer.GetTokenStream("Content", content);
+
+                // Obtenir le meilleur fragment (snippet)
+                string fragment = highlighter.GetBestFragment(tokenStream, content);
+
+                // Si pas de fragment, prendre un extrait simple
+                if (string.IsNullOrEmpty(fragment))
+                {
+                    fragment = content.Length > 200 ? content.Substring(0, 200) + "..." : content;
+                }
+
+                results.Add((id, fragment));
+            }
+            return results;
+        }
+    }
+}

@@ -4,51 +4,103 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WEBAPI_m1IL_1.Models;
 using WEBAPI_m1IL_1.Utils;
+using System;
+
+
 namespace WEBAPI_m1IL_1.Services
 {
     public class RigthAccessService
     {
         private readonly DocumentationDbContext _context;
+        private UserService userService;
 
-        public RigthAccessService(DocumentationDbContext context)
+        public RigthAccessService(DocumentationDbContext context, UserService userService)
         {
             _context = context;
-        }
-        public bool HasAccess(string userId, string resourceId)
-        {
-            // Logique pour vérifier si l'utilisateur a accès à la ressource
-            // Par exemple, vérifier dans une base de données ou un service externe
-            // Pour l'instant, on retourne toujours true pour simuler un accès autorisé
-            return true;
+            this.userService = userService;
         }
 
-        public void ModifyAccessToGroup()
-        {
-
+        public async Task  AddFirstUserToDocumentation(int userId, int documentationId){
+            var user = await userService.GetUserByIdAsync(userId);
+            var userPermissions = await GetUserPermission(userId,documentationId);
+            ChangePermissionUser(userPermissions,true,true,true,true);
+        }
+        public async Task  AddUserToDocumentation(int userId, int documentationId, bool? read, bool? write, bool? delete, bool? admin){
+            var user = await userService.GetUserByIdAsync(userId);
+            var userPermissions = await GetUserPermission(userId,documentationId);
+            ChangePermissionUser(userPermissions,read,write,delete,admin);
         }
 
-        public void AddUserToGroup(int userId, int groupId)
-        {
-            var user = _context.Users.Find(userId);
-            var group = _context.Groups.Find(groupId);
-            if (user == null || group == null)
+
+        public async Task<UserPermission> ChangePermissionUser(UserPermission userPermissions, bool? read, bool? write, bool? delete, bool? admin){
+            if (read.HasValue) userPermissions.CanRead = read.Value;
+            if (write.HasValue) userPermissions.CanWrite = write.Value;
+            if (delete.HasValue) userPermissions.CanDelete = delete.Value;
+            if (admin.HasValue) userPermissions.IsAdmin = admin.Value;
+            await _context.SaveChangesAsync();
+            return await GetUserPermission(userPermissions.UserId,userPermissions.DocumentationId);
+        }
+        public async Task<UserPermission> ChangeUserPermisionByOtherUser(int userId, int documentationId, bool? read, bool? write, bool? delete, bool? admin,int userIdToChange){
+            var userPermissions = await GetUserPermission(userId,documentationId);
+            if(!userPermissions.IsAdmin) return null;
+            var userToChangePermissions = await GetUserPermission(userIdToChange,documentationId);
+            var updatedPermission = await ChangePermissionUser(userPermissions,  read,  write,  delete, admin);
+            return updatedPermission;
+        }
+
+
+        public async Task<bool> DeletePermission(int userId,int documentationId,int UserToDelete){
+            var user = await userService.GetUserByIdAsync(userId);
+            var userPermissions = await GetUserPermission(userId,documentationId);
+            if(!userPermissions.IsAdmin) return false;
+            var userPermissionsToDelete =  _context.UserPermissions.Where(u => u.UserId == UserToDelete && u.DocumentationId == documentationId);
+                _context.UserPermissions.RemoveRange(userPermissionsToDelete);
+            userService.DeleteUserAsync(UserToDelete);
+             await _context.SaveChangesAsync();
+             return true;
+        }
+
+        public async Task<UserPermission> GetUserPermission(int userId, int documentationId){
+            var userPermission = await _context.UserPermissions
+                .FirstOrDefaultAsync(u => u.DocumentationId == documentationId && u.UserId == userId);
+            
+            if (userPermission == null)
             {
-                throw new Exception("User or group not found");
+                throw new InvalidOperationException("Permissions not found for this user and documentation.");
             }
-            user.UserGroup.Add(new UserGroup { UserId = userId, GroupId = groupId });
+            return userPermission;
         }
 
-        public void RemoveUserFromGroup(int userId, int groupId)
-        {
+        public async Task<ICollection<UserPermission>> GetAllUserPermission(int userId){
+                ICollection<UserPermission> userPermission = await _context.UserPermissions
+                .Where(u => u.UserId == userId)
+                .ToListAsync();
 
+            if (userPermission == null)
+            {
+                throw new InvalidOperationException("Permissions not found");
+            }
+            return userPermission;
         }
+        
 
-        public Group CreateGroup(int UserId)
-        {
-            var group = new Group { Name = SampleUtils.GenerateUUID() };
-            _context.Groups.Add(group);
-            _context.SaveChanges();
-            return group;
+        public async Task<bool> HavePermissionTo(int userId,int documentationId,string right){
+            var userPermission = await  _context.UserPermissions.FirstOrDefaultAsync(u => u.DocumentationId == documentationId && u.UserId == userId);
+                if (userPermission == null)
+                return false;
+            switch(right){
+                case "read":
+                return userPermission.CanRead;
+                case "write":
+                return userPermission.CanWrite;
+                case "delete":
+                return userPermission.CanDelete;
+                case "admin":
+                return userPermission.IsAdmin;
+                default:
+                throw new InvalidOperationException("User don't Have permissions for this documentation.");
+;
         }
     }
+}
 }

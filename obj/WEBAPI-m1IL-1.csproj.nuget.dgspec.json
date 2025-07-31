@@ -50,13 +50,25 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Csv": {
+              "target": "Package",
+              "version": "[2.0.170, )"
+            },
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[33.1.0, )"
+            },
             "Lucene.Net": {
               "target": "Package",
-              "version": "[4.8.0-beta00016, )"
+              "version": "[4.8.0-beta00017, )"
             },
             "Lucene.Net.Analysis.Common": {
               "target": "Package",
               "version": "[4.8.0-beta00016, )"
+            },
+            "Lucene.Net.Highlighter": {
+              "target": "Package",
+              "version": "[4.8.0-beta00017, )"
             },
             "Lucene.Net.QueryParser": {
               "target": "Package",
@@ -91,6 +103,10 @@
             "OpenAI": {
               "target": "Package",
               "version": "[2.2.0, )"
+            },
+            "PdfPig": {
+              "target": "Package",
+              "version": "[0.1.11, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
