@@ -8,5 +8,7 @@
         public string Tags { get; set; }
         public string FullPath { get; set; }
         public bool IsFolder { get; set; }
+        public string description { get; set; }
+
     }
 }

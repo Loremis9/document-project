@@ -17,7 +17,6 @@ namespace WEBAPI_m1IL_1.Services
         private readonly StandardAnalyzer _analyzer;
         private readonly string _indexPath;
         private readonly LuceneVersion _version = LuceneVersion.LUCENE_48;
-        private AIService aiService;
         const int maxChunkSize = 5000; // caractères max par chunk
 
         public LuceneSearchService()
@@ -44,73 +43,62 @@ namespace WEBAPI_m1IL_1.Services
             writer.AddDocument(document);
             writer.Commit();
         }
-            public void IndexDocumentFile(DocumentationFile documentFile, string path)
-            {
-                var indexConfig = new IndexWriterConfig(_version, _analyzer);
-                using var writer = new IndexWriter(_directory, new IndexWriterConfig(LuceneVersion.LUCENE_48, _analyzer));
+        public void IndexDocumentFile(DocumentationFile documentFile, string path)
+        {
+            var indexConfig = new IndexWriterConfig(_version, _analyzer);
+            using var writer = new IndexWriter(_directory, new IndexWriterConfig(LuceneVersion.LUCENE_48, _analyzer));
 
-                // Supprimer les anciens chunks liés à ce docId
-                writer.DeleteDocuments(new Term("documentFileId", documentFile.Id.ToString()));
-                var chunkNumber = 0;
-                foreach (var chunk in SampleUtils.ChunkString(FilesUtils.ReadFile(path), maxChunkSize))
-                {
-                    var doc = new Document
+            // Supprimer les anciens chunks liés à ce docId
+            writer.DeleteDocuments(new Term("documentFileId", documentFile.Id.ToString()));
+            var chunkNumber = 0;
+            foreach (var chunk in SampleUtils.ChunkString(FilesUtils.ReadFile(path), maxChunkSize))
+            {
+                var doc = new Document
                     {
                         new StringField("documentId", documentFile.DocumentationId.ToString(), Field.Store.YES),
                         new StringField("documentFileId", documentFile.Id.ToString(), Field.Store.YES),
                         new Int32Field("ChunkNumber", chunkNumber, Field.Store.YES),
                         new TextField("Content", chunk, Field.Store.YES)
                     };
-                    if (!string.IsNullOrWhiteSpace(documentFile.Tags))
+                if (!string.IsNullOrWhiteSpace(documentFile.Tags))
+                {
+                    var tagsArray = documentFile.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var tag in tagsArray)
                     {
-                        var tagsArray = documentFile.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                        foreach (var tag in tagsArray)
-                        {
-                            doc.Add(new StringField("Tag", tag.Trim().ToLower(), Field.Store.YES));
-                        }
+                        doc.Add(new StringField("Tag", tag.Trim().ToLower(), Field.Store.YES));
                     }
-                    writer.AddDocument(doc);
-                    chunkNumber++;
                 }
-                writer.Flush(triggerMerge: false, applyAllDeletes: false);
+                writer.AddDocument(doc);
+                chunkNumber++;
             }
+            writer.Flush(triggerMerge: false, applyAllDeletes: false);
+        }
 
 
-        public List<(int DocId, string Snippet)> SearchWithHighlights(string queryText, int documentationId,string? tags)
+        public List<(int DocId, string Snippet)> SearchWithHighlights(string queryText, int documentationId, string? tags)
         {
+            Console.WriteLine($"Searching with query: {queryText}, DocumentationId: {documentationId}, Tags: {tags}");
             int maxResults = 20;
+            var keywords = queryText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (!keywords.Any())
+                return new List<(int, string)>();
+
             using var reader = DirectoryReader.Open(_directory);
             var searcher = new IndexSearcher(reader);
-            var parser = new QueryParser(_version, "Content", _analyzer);
-            var query = parser.Parse(queryText);
-            var booleanQuery = new BooleanQuery
-            {
-                { query, Occur.MUST }
-            };
-
-
-            var docIdQuery = new TermQuery(new Term("DocumentationId", documentationId.ToString()));
-            booleanQuery.Add(docIdQuery, Occur.MUST);
-            var IsPublicQuery = new TermQuery(new Term("isPublic", false.ToString()));
-            booleanQuery.Add(IsPublicQuery, Occur.MUST);
-
-            if (!string.IsNullOrWhiteSpace(tags) && tags.Any())
-            {
-                var tagsQuery = new BooleanQuery();
-                foreach (var tag in tags)
-                {
-                    tagsQuery.Add(new TermQuery(new Term("Tag", tags.Trim().ToLower())), Occur.SHOULD);
-                }
-                booleanQuery.Add(tagsQuery, Occur.MUST);
-            }
-            var hits = searcher.Search(query, maxResults).ScoreDocs;
-
+            var booleanQuery = BuildQueryFromKeywords(keywords, documentationId, tags);
+            var hits = searcher.Search(booleanQuery, maxResults).ScoreDocs;
             var results = new List<(int, string)>();
+            var query = new BooleanQuery();
+            foreach (var kw in keywords)
+                query.Add(new TermQuery(new Term("Content", kw)), Occur.SHOULD);
+            var parser = new QueryParser(_version, "Content", _analyzer);
 
             var scorer = new QueryScorer(query);
             var formatter = new SimpleHTMLFormatter("<b>", "</b>");
-            var highlighter = new Highlighter(formatter, scorer);
-            highlighter.TextFragmenter = new SimpleFragmenter(100); // taille max fragment
+            var highlighter = new Highlighter(formatter, scorer)
+            {
+                TextFragmenter = new SimpleFragmenter(100)
+            };
 
             foreach (var hit in hits)
             {
@@ -118,13 +106,9 @@ namespace WEBAPI_m1IL_1.Services
                 int id = int.Parse(doc.Get("Id"));
                 string content = doc.Get("Content");
 
-                // TokenStream pour le contenu
                 using var tokenStream = _analyzer.GetTokenStream("Content", content);
-
-                // Obtenir le meilleur fragment (snippet)
                 string fragment = highlighter.GetBestFragment(tokenStream, content);
 
-                // Si pas de fragment, prendre un extrait simple
                 if (string.IsNullOrEmpty(fragment))
                 {
                     fragment = content.Length > 200 ? content.Substring(0, 200) + "..." : content;
@@ -132,7 +116,43 @@ namespace WEBAPI_m1IL_1.Services
 
                 results.Add((id, fragment));
             }
+
             return results;
+        }
+        private BooleanQuery BuildQueryFromKeywords(string[] keywords, int documentationId, string? tags)
+        {
+            var booleanQuery = new BooleanQuery();
+
+            // Ajouter les mots-clés avec OR
+            var keywordQuery = new BooleanQuery();
+            foreach (var keyword in keywords)
+            {
+                keywordQuery.Add(new TermQuery(new Term("Content", keyword.ToLowerInvariant())), Occur.SHOULD);
+            }
+            booleanQuery.Add(keywordQuery, Occur.MUST);
+
+            // Filtre par DocumentationId
+            booleanQuery.Add(new TermQuery(new Term("DocumentationId", documentationId.ToString())), Occur.MUST);
+
+            // Filtre par isPublic
+            booleanQuery.Add(new TermQuery(new Term("isPublic", "False")), Occur.MUST);
+
+            // Filtre par tags (si nécessaire)
+            if (!string.IsNullOrWhiteSpace(tags))
+            {
+                var tagsArray = tags.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                if (tagsArray.Any())
+                {
+                    var tagsQuery = new BooleanQuery();
+                    foreach (var tag in tagsArray)
+                    {
+                        tagsQuery.Add(new TermQuery(new Term("Tag", tag.Trim().ToLower())), Occur.SHOULD);
+                    }
+                    booleanQuery.Add(tagsQuery, Occur.MUST);
+                }
+            }
+
+            return booleanQuery;
         }
     }
 }

@@ -14,91 +14,141 @@ namespace WEBAPI_m1IL_1.Services
         private LuceneSearchService luceneService;
         private DocumentFilesService documentationFileService;
         private AIService aiService;
-        public DocumentService(DocumentationDbContext context,RigthAccessService rigthAccessService,
-        LuceneSearchService luceneService,DocumentFilesService documentationFileService,AIService aiService)
+        private UserService userService;
+
+        public DocumentService(DocumentationDbContext context, RigthAccessService rigthAccessService,
+        LuceneSearchService luceneService, DocumentFilesService documentationFileService, AIService aiService, UserService userService)
         {
             _context = context;
             this.rigthAccessService = rigthAccessService;
             this.luceneService = luceneService;
             this.documentationFileService = documentationFileService;
-            this.aiService = aiService;;
+            this.aiService = aiService;
+            this.userService = userService;
+
         }
 
-        public async Task<Documentation> CreateDocument(string name, string description, bool isPublic, int userid,string path)
+        public async Task<Documentation> CreateDocument(string name, string description, bool isPublic, int userId, string path, string tags)
         {
+            var user = await userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException("Utilisateur non trouvé");
+            }
+
             var document = new Documentation
             {
                 Title = name,
                 Description = description,
                 IsPublic = isPublic,
-                RootPath = path
+                RootPath = path,
+                Tags = tags
             };
-             _context.Documentations.Add(document);
-            var documentation = await _context.SaveChangesAsync();
-            rigthAccessService.AddFirstUserToDocumentation(userid,documentation);
-            await _context.SaveChangesAsync();
+
+
+            await _context.Documentations.AddAsync(document);
+            await _context.SaveChangesAsync(); // Ici, document.Id est rempli par EF Core
+
+            await rigthAccessService.AddFirstUserToDocumentation(userId, document.Id);
+
             luceneService.IndexDocument(document);
 
             return document;
         }
 
-        public async Task<OutputDocument> ImportDocument(int userId,string path,string title, string description,bool isPublic)
+        public async Task<OutputDocument> ImportDocument(int userId, string path, string title, string description, bool isPublic, string tags)
         {
-            var document = await CreateDocument(title,description,isPublic,userId,path);
-            luceneService.IndexDocument(document);
-            var docs = ScannerUtils.ScanDirectory(path);
-            foreach (var doc in docs)
+            try
             {
-                var documentFile = await documentationFileService.CreateDocumentFile(document.Id,doc.Path,doc.IsDirectory,userId);
-                luceneService.IndexDocumentFile(documentFile,File.ReadAllText(doc.Path));
+                // Crée le document
+                var document = await CreateDocument(title, description, isPublic, userId, path, tags);
+
+                // Scan fichiers
+                var tree = SampleUtils.GetDirectoryTree(path, includeFiles: true);
+                var docs = ScannerUtils.ScanDirectory(path);
+
+                // Crée les entrées pour chaque fichier
+                foreach (var doc in docs)
+                {
+
+                    var documentFile = await documentationFileService.CreateDocumentFile(document.Id, doc.Path, doc.IsDirectory, userId);
+                    if (!doc.IsDirectory)
+                    {
+                        var content = await File.ReadAllTextAsync(doc.Path); // async
+                    }
+                }
+
+                // Index le document global après succès complet
+                luceneService.IndexDocument(document);
+
+                return new OutputDocument
+                {
+                    Id = document.Id,
+                    Title = document.Title,
+                    Tags = document.Tags,
+                    Tree = tree
+                };
             }
-            var tree = FilesUtils.GetDirectoryTree(path,includeFiles: true);
-            return new OutputDocument { Id = document.Id,Title = document.Title,Tags=document.Tags,Tree=tree };
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Erreur lors de l'import du document : {ex.Message}", ex);
+            }
         }
 
-        public async Task<Documentation?> FindDocumentById(int id)
+        public async Task<Documentation?> FindDocumentById(int id, int userId)
         {
             return await _context.Documentations.FirstOrDefaultAsync(d => d.Id == id);
         }
 
 
-        public async Task<Documentation?> FindDocumentByName(string name)
+        public async Task<Documentation?> FindDocumentByName(string name, int userId)
         {
             return await _context.Documentations.FirstOrDefaultAsync(d => d.Title == name);
         }
 
-        public async Task<List<Documentation>> GetByTagAsync(string tag)
+
+        public async Task<string> SearchByPrompt(int userId, string prompt, string model)
         {
-            return await _context.Documentations
-                .Where(d => d.Tags != null && d.Tags.Contains(tag))
-                .ToListAsync();
-        }
-
-        public async Task<string> SearchByPrompt(int userId,string prompt){
-
+            // Récupère les permissions utilisateur
             var userPermissions = await rigthAccessService.GetAllUserPermission(userId);
-            var q = await aiService.AskAi(userId,null,"reformule", prompt, SampleUtils.GenerateUUID());
-            var tags = await aiService.AskAi(userId,null,"tags", prompt,SampleUtils.GenerateUUID());
+
+            // Reformulation et extraction des tags via IA avec fallback
+            //série de plusieurs mot clé pour chercher dans une documentation
+            var q = await aiService.AskQuestionToAi(userId, prompt, "reformule", SampleUtils.GenerateUUID(), model, null) ?? prompt;
+            //tags court 3 pour selectionner par tags
+            var tagsRaw = await aiService.AskAi(userId, prompt, "tag", SampleUtils.GenerateUUID()) ?? "";
+            Console.WriteLine($" reformule : {q} \n tag: {tagsRaw}");
+            // Nettoyage basique des tags (si IA retourne une chaîne)
+            tagsRaw = tagsRaw.Replace("[", "").Replace("]", "").Replace("\"", "").Trim();
+
             var conversationId = SampleUtils.GenerateUUID();
             var documentation = new List<(int DocId, string Snippet)>();
-
-            foreach(var userPermission in userPermissions){
-                documentation = luceneService.SearchWithHighlights(q,userPermission.DocumentationId,tags);
+            // Agrège les résultats Lucene pour toutes les permissions
+            foreach (var userPermission in userPermissions)
+            {
+                var docs = luceneService.SearchWithHighlights(q, userPermission.DocumentationId, tagsRaw);
+                documentation.AddRange(docs);
             }
+
+            if (!documentation.Any())
+                return "Aucun document trouvé pour votre recherche.";
+
+            // Prépare les chunks pour l’IA
             var responses = new StringBuilder();
             var chunkedDocs = SampleUtils.PrepareChunksForOllama(documentation);
+
             foreach (var chunk in chunkedDocs)
             {
-                var chunkResponse = aiService.AskAi(userId,chunk,"search", null, conversationId);
+                Console.WriteLine($"Chunk: {chunk}");
 
-                if (chunkResponse != null)
+                var chunkResponse = await aiService.AskAi(userId, chunk, "search", conversationId);
+                if (!string.IsNullOrEmpty(chunkResponse))
                 {
-                    responses.Append(chunkResponse);
+                    responses.AppendLine(chunkResponse);
                 }
             }
 
-            // Concatène toutes les réponses en une seule string
-            return string.Join(" ", responses);
+            return responses.ToString();
         }
 
     }

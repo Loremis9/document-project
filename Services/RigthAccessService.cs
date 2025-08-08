@@ -20,17 +20,29 @@ namespace WEBAPI_m1IL_1.Services
             this.userService = userService;
         }
 
-        public async Task  AddFirstUserToDocumentation(int userId, int documentationId){
+        public async Task AddFirstUserToDocumentation(int userId, int documentationId){
+            var user = await userService.GetUserByIdAsync(userId);
+            await CreateUserPermission(user, documentationId);
+        }
+        public async Task AddUserToDocumentation(int userId, int documentationId, bool? read, bool? write, bool? delete, bool? admin){
             var user = await userService.GetUserByIdAsync(userId);
             var userPermissions = await GetUserPermission(userId,documentationId);
-            ChangePermissionUser(userPermissions,true,true,true,true);
+            await ChangePermissionUser(userPermissions,read,write,delete,admin);
         }
-        public async Task  AddUserToDocumentation(int userId, int documentationId, bool? read, bool? write, bool? delete, bool? admin){
-            var user = await userService.GetUserByIdAsync(userId);
-            var userPermissions = await GetUserPermission(userId,documentationId);
-            ChangePermissionUser(userPermissions,read,write,delete,admin);
+        public async Task CreateUserPermission(UserModel user, int documentationId)
+        {
+           var permission = new UserPermission
+           {
+               UserId = user.Id,
+               DocumentationId = documentationId,
+               CanRead = true,
+               CanWrite = true,
+               CanDelete = true,
+               IsAdmin = true
+           };
+            await _context.UserPermissions.AddAsync(permission);
+            await _context.SaveChangesAsync();
         }
-
 
         public async Task<UserPermission> ChangePermissionUser(UserPermission userPermissions, bool? read, bool? write, bool? delete, bool? admin){
             if (read.HasValue) userPermissions.CanRead = read.Value;
@@ -55,7 +67,6 @@ namespace WEBAPI_m1IL_1.Services
             if(!userPermissions.IsAdmin) return false;
             var userPermissionsToDelete =  _context.UserPermissions.Where(u => u.UserId == UserToDelete && u.DocumentationId == documentationId);
                 _context.UserPermissions.RemoveRange(userPermissionsToDelete);
-            userService.DeleteUserAsync(UserToDelete);
              await _context.SaveChangesAsync();
              return true;
         }
@@ -72,10 +83,9 @@ namespace WEBAPI_m1IL_1.Services
         }
 
         public async Task<ICollection<UserPermission>> GetAllUserPermission(int userId){
-                ICollection<UserPermission> userPermission = await _context.UserPermissions
+                var userPermission = await _context.UserPermissions
                 .Where(u => u.UserId == userId)
                 .ToListAsync();
-
             if (userPermission == null)
             {
                 throw new InvalidOperationException("Permissions not found");
@@ -99,7 +109,6 @@ namespace WEBAPI_m1IL_1.Services
                 return userPermission.IsAdmin;
                 default:
                 throw new InvalidOperationException("User don't Have permissions for this documentation.");
-;
         }
     }
 }

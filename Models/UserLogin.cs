@@ -2,7 +2,7 @@
 {
     public class UserLogin
     {
-        public int UserId { get; set; }= 0;
+        public string UserEmail { get; set; }
         public string Password { get; set; } = null!;
     }
 }

@@ -5,24 +5,28 @@ using Microsoft.EntityFrameworkCore;
 using WEBAPI_m1IL_1.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
-
+using WEBAPI_m1IL_1.DTO;
 namespace WEBAPI_m1IL_1.Services
 {
     public class UserService    
     {
         private readonly DocumentationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private RigthAccessService rigthAccessService;
-        public UserService(DocumentationDbContext context,IHttpContextAccessor httpContextAccessor,RigthAccessService rigthAccessService)
+        public UserService(DocumentationDbContext context,IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
-            this.rigthAccessService = rigthAccessService;
         }
 
         // CREATE
-        public async Task<UserModel> CreateUserAsync(UserModel user)
+        public async Task<UserModel> CreateUserAsync(string username, string emailAddress,string password)
         {
+            var user = new UserModel {
+                Username = username,
+                EmailAddress =  emailAddress,
+                Password = password
+            };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;
@@ -44,38 +48,50 @@ namespace WEBAPI_m1IL_1.Services
             return user;
         }
 
-        // READ BY NAME
+
         public async Task<UserModel?> GetUserByNameAsync(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
+
         public async Task<UserModel?> GetUserByMailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.EmailAddress == email);
         }
         // UPDATE
-        public async Task<bool> UpdateUser(UserModel user,int userId)
+        public async Task<OutputUserDto> UpdateUser(string? username,string? password,string? email,int userId)
         {
-            var existingUser = await _context.Users.FindAsync(user.Id);
+            var existingUser = await _context.Users.FindAsync(userId);
             
-            if (existingUser == null) return false;
-            existingUser.Username = user.Username;
-            existingUser.EmailAddress = user.EmailAddress;
-            existingUser.Password = user.Password;
+            if (existingUser == null) return null;
+            if(string.IsNullOrEmpty(username))
+                existingUser.Username = username;
+            if(string.IsNullOrEmpty(email))
+                existingUser.EmailAddress = email;
+            if(string.IsNullOrEmpty(password))
+                existingUser.Password = password;
             await _context.SaveChangesAsync();
-            return true;
+            var updatedUser = await _context.Users.FindAsync(userId);
+            return new OutputUserDto { Id = updatedUser.Id,
+                EmailAddress = updatedUser.EmailAddress,
+                Username = updatedUser.Username
+            };
         }
 
         // DELETE
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<bool> DeleteUser(int id, int UserToDelete)
         {
-            var user = await _context.Users.FindAsync(id);
+            var userToDeleteIsAdmin = await _context.Users.FindAsync(id);
+            if(!userToDeleteIsAdmin.IsGlobalAdmin)
+                throw new Exception("UserToDelete is not globalAdmin");
+
+            var user = await _context.Users.FindAsync(UserToDelete);
             if (user == null) return false;
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
         }
-        public UserModel? GetCurrentUser()
+        public async Task<UserModel?> GetCurrentUserAsync()
         {
             var identity = _httpContextAccessor.HttpContext.User.Identity as ClaimsIdentity;
 
@@ -86,10 +102,7 @@ namespace WEBAPI_m1IL_1.Services
 
                 if (int.TryParse(idValue, out int id))
                 {
-                    return new UserModel
-                    {
-                        Id = id,
-                    };
+                    return await GetUserByIdAsync(id);
                 }
             }
             return null;

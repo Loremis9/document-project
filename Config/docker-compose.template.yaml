@@ -1,29 +1,31 @@
 version: "3.9"
 
 services:
-  ollama-1:
+{{#each Containers}}
+  {{Name}}:
     image: ollama/ollama:latest
-    container_name: ollama-1
+    container_name: {{Name}}
     ports:
-      - "11434:11434"
+      - "{{Port}}:11434"
     volumes:
-      - ./script/entrypoint-ollama-1.sh:/script/entrypoint.sh
-      - ./ollama/ollama-1:/root/.ollama
+      - ./script/entrypoint-{{Name}}.sh:/script/entrypoint.sh
+      - ./ollama/{{Name}}:/root/.ollama
     environment:
       OLLAMA_MODELS: /root/.ollama
       OLLAMA_KEEP_ALIVE: 4h
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 8g
+          cpus: "{{CPU}}"
+          memory: {{Memory}}
         reservations:
           devices:
-            - driver: nvidia
+            - driver: {{Driver}}
               count: 1
               capabilities: [gpu]
-    runtime: nvidia
+    runtime: {{Runtime}}
     entrypoint: ["sh","/script/entrypoint.sh" ]
+{{/each}}
 
   minio:
     image: minio/minio:latest
@@ -39,14 +41,14 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: Documentation
+    container_name: {{Postgres.ContainerName}}
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: documentation
+      POSTGRES_USER: {{Postgres.PostgresUser}}
+      POSTGRES_PASSWORD: {{Postgres.PostgresPassword}}
+      POSTGRES_DB: {{Postgres.Database}}
     ports:
-      - "5432:5432"
+      - "{{Postgres.Port}}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 

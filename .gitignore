@@ -1,0 +1,13 @@
+# Ignore bin folders recursively
+bin/
+
+# Ignore obj folders recursively
+obj/
+
+# Ignore ollama folder recursively
+ollama/
+
+# Ignore Visual Studio workspace folder
+.vs/
+
+appsettings.json

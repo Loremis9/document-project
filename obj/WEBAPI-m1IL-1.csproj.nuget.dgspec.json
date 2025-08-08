@@ -58,6 +58,14 @@
               "target": "Package",
               "version": "[33.1.0, )"
             },
+            "DocumentFormat.OpenXml": {
+              "target": "Package",
+              "version": "[3.3.0, )"
+            },
+            "Handlebars.Net": {
+              "target": "Package",
+              "version": "[2.1.6, )"
+            },
             "Lucene.Net": {
               "target": "Package",
               "version": "[4.8.0-beta00017, )"
@@ -99,6 +107,14 @@
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
               "version": "[8.0.7, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.7.4, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.11, )"
             },
             "OpenAI": {
               "target": "Package",
