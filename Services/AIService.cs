@@ -22,20 +22,32 @@ namespace WEBAPI_m1IL_1.Services
 
     public class AIService
     {
-        public static string Config(String props)
+
+
+
+        private readonly HttpClient _httpClient;
+        private string EndpointOllama;
+        private readonly string MainAiModel;
+        private readonly IConfiguration _config;
+        public AIService(HttpClient httpClient,IConfiguration configuration)
         {
-            var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
+            _httpClient = httpClient;
+            _httpClient.Timeout = TimeSpan.FromMinutes(5);
+            _config = configuration;
+            EndpointOllama = @$"http://localhost:{Config("Port")}/api/generate";
+            MainAiModel = Config("Model");
+        }
+        public string Config(String props)
+        {
             switch (props)
             {
                 case "Port":
-                    return config["Ollama:Containers:0:Port"];
+                    return _config["Ollama:Containers:0:Port"];
                 case "Model":
-                    return config["MainAIModel:Model"];
+                    return _config["MainAIModel:Model"];
                 case "AllModel":
                     var sb = new StringBuilder();
-                    var models = config.GetSection("Ollama:Containers").Get<List<OllamaContainer>>();
+                    var models = _config.GetSection("Ollama:Containers").Get<List<OllamaContainer>>();
                     foreach (var model in models)
                     {
                         sb.Append($"{model.Model},");
@@ -46,18 +58,6 @@ namespace WEBAPI_m1IL_1.Services
                 default:
                     throw new ArgumentException("Invalid configuration property requested.");
             }
-        }
-
-
-        private readonly HttpClient _httpClient;
-        private string EndpointOllama = @$"http://localhost:{Config("Port")}/api/generate";
-        private readonly string MainAiModel = Config("Model");
-
-        public AIService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-            _httpClient.Timeout = TimeSpan.FromMinutes(5);
-
         }
         public async Task<string> AskQuestionToAi(int userId, string prompt, string ask, string? contextId, string? model, string? image)
         {
@@ -71,9 +71,12 @@ namespace WEBAPI_m1IL_1.Services
                     return null;
             }
         }
-        public async Task<string> AskDescriptionImageToAi(int userId, string image, string? contextId)
+
+        public async Task<string> AskDescriptionImageToAi(string imageContent, string? contextId)
         {
-            return await SendToAi(GetModelPayload($"{AiPrompts.DescriptionImage}", userId, contextId, image));
+            var imageByte = Convert.FromBase64String(File.ReadAllText(imageContent));
+            string imageBase = Convert.ToBase64String(imageByte);
+            return await SendToAi(GetModelPayload($"{AiPrompts.DescriptionImage}", null, contextId, imageBase));
         }
 
         public async Task<string> AskAi(int userId, string? content, string ask, string? contextId)
@@ -109,11 +112,15 @@ namespace WEBAPI_m1IL_1.Services
             return CleanResponse(ollamaResponse?.Answer) ?? string.Empty;
         }
 
-        public object GetModelPayload(string prompt, int userId, string contextId, string? model, string? image = null)
+        public object GetModelPayload(string prompt, int? userId, string contextId, string? model, string? image = null)
         {
             if (string.IsNullOrEmpty(model))
             {
                 model = MainAiModel;
+            }
+            if (!userId.HasValue)
+            {
+                userId = 1; 
             }
             var context = userId.ToString() + contextId;
             int[] contextArray = context.Select(c => (int)c).ToArray();

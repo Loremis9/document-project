@@ -321,3 +321,13 @@ C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.Securit
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.Security.Cryptography.Xml.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\ZString.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\appsettings-model.json
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\CommunityToolkit.HighPerformance.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Minio.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.IO.Hashing.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.Reactive.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Aspose.Note.dll
+C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

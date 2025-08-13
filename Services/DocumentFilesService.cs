@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using WEBAPI_m1IL_1.Utils;
 using WEBAPI_m1IL_1.DTO;
 using System.Runtime.CompilerServices;
+using WEBAPI_m1IL_1.Helpers;
+
 namespace WEBAPI_m1IL_1.Services
 {
     public class DocumentFilesService
@@ -11,56 +13,83 @@ namespace WEBAPI_m1IL_1.Services
         private DocumentationDbContext _context;
         private LuceneSearchService luceneService;
         private AIService aiService;
-        public DocumentFilesService(DocumentationDbContext context, RigthAccessService rigthAccessService, LuceneSearchService luceneService, AIService aiService)
+        private MinIoService _minIoService;
+        private ConvertToMarkdownService _convertToMarkdownService;
+        public DocumentFilesService(DocumentationDbContext context, RigthAccessService rigthAccessService, LuceneSearchService luceneService, AIService aiService, MinIoService minIoService, ConvertToMarkdownService convertToMarkdownService)
         {
             _context = context;
             this.rigthAccessService = rigthAccessService;
             this.luceneService = luceneService;
             this.aiService = aiService;
+            _minIoService = minIoService;
+            _convertToMarkdownService = convertToMarkdownService;
         }
 
-        public async Task<DocumentationFile> CreateDocumentFile(int documentId, string path, bool isFolder, int userId)
+        public async Task<DocumentationFile> CreateDocumentFile(int documentId, string path, bool isFolder, int userId, Stream fileStream, string ext)
         {
+            var contentMarkDown = "";
             try
             {
                 var contextRequest = SampleUtils.GenerateUUID();
                 var documentFile = new DocumentationFile();
-                if (FilesUtils.IsImage(path))
-                {
-                    var description = await aiService.AskDescriptionImageToAi(userId, SampleUtils.ConvertImageToBase64(path), contextRequest);
-                    var tags = await aiService.AskAi(userId, description, "tag", contextRequest);
-                    documentFile.FullPath = path;
-                    documentFile.IsFolder = isFolder;
-                    documentFile.DocumentationId = documentId;
-                    documentFile.Tags = tags;
-                    documentFile.description = description;
+                if(isFolder){
+                 documentFile.IsFolder = isFolder;
+                 documentFile.DocumentationId = documentId;
+                 documentFile.Tags = "folder";
+                 documentFile.Description = "folder";
+                 documentFile.FullPath = path;
+                 var pathFile =  await _minIoService.CreateDirectory(path);
+                 documentFile.FullPath = pathFile;
                 }
                 else
                 {
-                    var content = await TransformDocumentFileToText(path);
-                    // Tags générés par l'IA
-                    var tags = await aiService.AskAi(userId, content, "tag", SampleUtils.GenerateUUID());
+                    if(FilesUtils.IsImage(ext))
+                    {
+                        using var ms = new MemoryStream();
+                        await fileStream.CopyToAsync(ms);
+                        byte[] fileBytes = ms.ToArray();
+                        var images = JsonHelper.ExtractMetadata(await aiService.AskDescriptionImageToAi(System.Text.Encoding.UTF8.GetString(fileBytes), SampleUtils.GenerateUUID()));
+                        documentFile.IsFolder = isFolder;
+                        documentFile.DocumentationId = documentId;
+                        documentFile.Tags = string.Join(",",images.Tags);
+                        documentFile.Description = images.Description;
+                        documentFile.FullPath = path;
+                        var image = await _minIoService.UploadImageAsync(documentFile, fileBytes);
+                        documentFile.FullPath = image;
+                    }
+                    else
+                    {
+                    
+                        var content = await _convertToMarkdownService.ExtractFromFile(fileStream, documentId,ext,path);
+                        // Tags générés par l'IA
+                        var tags = await aiService.AskAi(userId, content, "tag", SampleUtils.GenerateUUID());
 
-                    // Découpe et conversion en parallèle
-                    var chunks = SampleUtils.ChunkString(content, 10000);
-                    var convertTasks = chunks.Select(chunk => aiService.AskAi(userId, chunk, "convert", contextRequest));
-                    var convertedChunks = await Task.WhenAll(convertTasks);
-                    //chunck aussi les decription et ensuite demander à l'ai de synthétiser
-                    var description = await aiService.AskAi(userId, content, "description", contextRequest);
-                    var contentMarkDown = string.Join("\n", convertedChunks);
-                    var markdownPath = Path.ChangeExtension(path, ".md");
-                    await File.WriteAllTextAsync(markdownPath, contentMarkDown);
-                    documentFile.FullPath = path;
-                    documentFile.IsFolder = isFolder;
-                    documentFile.DocumentationId = documentId;
-                    documentFile.Tags = tags;
-                    documentFile.description = description;
+                        // Découpe et conversion en parallèle
+                        var chunks = SampleUtils.ChunkString(content, 10000);
+                        var convertTasks = chunks.Select(chunk => aiService.AskAi(userId, chunk, "convert", contextRequest));
+                        var convertedChunks = await Task.WhenAll(convertTasks);
+                        //chunck aussi les decription et ensuite demander à l'ai de synthétiser
+                        var description = await aiService.AskAi(userId, content, "description", contextRequest);
+                        contentMarkDown = string.Join("\n", convertedChunks);
+                        var markdownPath = Path.ChangeExtension(path, ".md");
+                        documentFile.FullPath = path;
+                        documentFile.IsFolder = isFolder;
+                        documentFile.DocumentationId = documentId;
+                        documentFile.Tags = tags;
+                        documentFile.Description = description;
+                        var pathFile =  await  _minIoService.UploadDocumentFileAsync(documentFile, contentMarkDown);
+                        documentFile.FullPath = pathFile;
+                    }
                 }
+
                 // Ajout en DB
                 await _context.DocumentationFiles.AddAsync(documentFile);
                 await _context.SaveChangesAsync();
 
-                luceneService.IndexDocumentFile(documentFile, path);
+                if (!FilesUtils.IsImage(ext))
+                { 
+                    luceneService.IndexDocumentFile(documentFile, contentMarkDown);
+                }
 
                 return documentFile;
             }
@@ -68,19 +97,6 @@ namespace WEBAPI_m1IL_1.Services
             {
                 throw new InvalidOperationException($"Erreur lors de la création du fichier : {ex.Message}", ex);
             }
-        }
-
-        public async Task<string> TransformDocumentFileToText(string filePath)
-        {
-            if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentException("File path cannot be null or empty", nameof(filePath));
-
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException("File not found", filePath);
-
-            string convertToText = FilesUtils.ExtractFromFile(filePath, filePath + "/image");
-
-            return convertToText;
         }
 
 
@@ -145,17 +161,6 @@ namespace WEBAPI_m1IL_1.Services
                 .FirstOrDefaultAsync(df => df.DocumentationId == documentId && df.Id == documentFileId);
         }
 
-        public async Task<List<DocumentationFile>> FindDocumentFileByDocumentFileId(int userId, int documentId, int documentFileId)
-        {
-            var permission = await rigthAccessService.HavePermissionTo(userId, documentId, "read");
-            if (!permission)
-            {
-                throw new UnauthorizedAccessException($"User {userId} does not have read permission for documentation {documentId}.");
-            }
-            return await _context.DocumentationFiles
-                .Where(df => df.DocumentationId == documentId)
-                .ToListAsync();
-        }
         public async Task<List<DocumentationFile>> GetAllFilesByDocumentId(int userId, int documentId)
         {
             var permission = await rigthAccessService.HavePermissionTo(userId, documentId, "read");

@@ -10,26 +10,20 @@ info:
   version: V1
 paths:
   /api/Ai/ChatWithAi:
-    get:
+    post:
       tags:
         - Ai
-      parameters:
-        - name: prompt
-          in: query
-          schema:
-            type: string
-        - name: image
-          in: query
-          schema:
-            type: string
-        - name: context
-          in: query
-          schema:
-            type: string
-        - name: model
-          in: query
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputChat'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/InputChat'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/InputChat'
       responses:
         '200':
           description: OK
@@ -41,23 +35,6 @@ paths:
     get:
       tags:
         - Ai
-      parameters:
-        - name: prompt
-          in: query
-          schema:
-            type: string
-        - name: image
-          in: query
-          schema:
-            type: string
-        - name: context
-          in: query
-          schema:
-            type: string
-        - name: model
-          in: query
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -328,7 +305,7 @@ paths:
               schema:
                 type: boolean
   /api/User/create-user:
-    get:
+    post:
       tags:
         - User
       parameters:
@@ -375,7 +352,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OutputUserDto'
   /api/User/update-user:
-    get:
+    patch:
       tags:
         - User
       parameters:
@@ -405,7 +382,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OutputUserDto'
   /api/User/delete-user:
-    get:
+    delete:
       tags:
         - User
       parameters:
@@ -480,6 +457,22 @@ components:
         isFolder:
           type: boolean
         description:
+          type: string
+          nullable: true
+      additionalProperties: false
+    InputChat:
+      type: object
+      properties:
+        prompt:
+          type: string
+          nullable: true
+        image:
+          type: string
+          nullable: true
+        context:
+          type: string
+          nullable: true
+        model:
           type: string
           nullable: true
       additionalProperties: false

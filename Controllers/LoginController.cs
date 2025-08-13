@@ -6,7 +6,8 @@ using System.Security.Claims;
 using System.Text;
 using WEBAPI_m1IL_1.Models;
 using WEBAPI_m1IL_1.Services;
-
+using WEBAPI_m1IL_1.Helpers;
+using NPOI.XSSF.UserModel.Helpers;
 namespace WEBAPI_m1IL_1.Controllers
 {
     [Route("api/[controller]")]
@@ -22,11 +23,11 @@ namespace WEBAPI_m1IL_1.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(UserLogin userLogin)
+        public async Task<IActionResult> Login(UserLogin userLogin)
         {
             Console.WriteLine($"Tentative de connexion pour: {userLogin.UserEmail}");
 
-            var isOk = Authenticate(userLogin);
+            var isOk = await Authenticate(userLogin);
 
             if (isOk != -1)
             {
@@ -76,23 +77,20 @@ namespace WEBAPI_m1IL_1.Controllers
             return tokenString;
         }
 
-        private int Authenticate(UserLogin userLogin)
+        private async Task<int> Authenticate(UserLogin userLogin)
         {
-            var allUsers = UserConstants.Users;
+            if (userLogin == null || string.IsNullOrWhiteSpace(userLogin.UserEmail) || string.IsNullOrWhiteSpace(userLogin.Password))
+                return -1; // Données invalides
 
-            var userExist = from user in allUsers
-                            where user.EmailAddress == userLogin.UserEmail
-                                && user.Password == userLogin.Password
-                            select user;
+            var user = await userService.GetUserByMailAsync(userLogin.UserEmail);
+            if (user == null)
+                return -1; // Utilisateur introuvable
 
-            if (userExist.Any())
-            {
-                return userExist.First().Id;
-            }
-            else
-            {
-                return -1;
-            }
+            // 🔐 Comparaison sécurisée si tu stockes un hash
+            if (!PasswordHelper.VerifyPassword(userLogin.Password, user.Password))
+                return -1; // Mot de passe incorrect
+
+            return user.Id; // Authentification réussie
         }
     }
 }

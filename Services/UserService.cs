@@ -107,6 +107,9 @@ namespace WEBAPI_m1IL_1.Services
             }
             return null;
         }
-
+        public bool VerifyPassword(string plainPassword, string storedHash)
+        {
+            return plainPassword == storedHash;
+        }
     }
 }

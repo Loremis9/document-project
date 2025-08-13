@@ -1,5 +1,6 @@
 using WEBAPI_m1IL_1.Models;
 using System.Text;
+using System.IO.Compression;
 
 namespace WEBAPI_m1IL_1.Utils
 {
@@ -59,29 +60,54 @@ namespace WEBAPI_m1IL_1.Utils
             chunks.Add($"--------------- FIN ----------------- \n");
             return chunks;
         }
-        public static string GetDirectoryTree(string rootPath, bool includeFiles = true, string indent = "", bool isLast = true)
+        public static string GetDirectoryTreeFromZipStream(Stream zipStream, bool includeFiles = true)
         {
-            var result = new System.Text.StringBuilder();
-            var dirInfo = new DirectoryInfo(rootPath);
-            result.AppendLine(indent + (isLast ? "└── " : "├── ") + dirInfo.Name);
-            indent += isLast ? "    " : "│   ";
+            var result = new StringBuilder();
+            using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
-            var subDirs = dirInfo.GetDirectories();
-            for (int i = 0; i < subDirs.Length; i++)
+            // Créer une structure arborescente
+            var root = new Dictionary<string, object>();
+
+            foreach (var entry in archive.Entries)
             {
-                bool lastDir = (i == subDirs.Length - 1) && (!includeFiles || dirInfo.GetFiles().Length == 0);
-                result.Append(GetDirectoryTree(subDirs[i].FullName, includeFiles, indent, lastDir));
-            }
-            if (includeFiles)
-            {
-                var files = dirInfo.GetFiles();
-                for (int i = 0; i < files.Length; i++)
+                var parts = entry.FullName.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                var current = root;
+
+                for (int i = 0; i < parts.Length; i++)
                 {
-                    bool lastFile = (i == files.Length - 1);
-                    result.AppendLine(indent + (lastFile ? "└── " : "├── ") + files[i].Name);
+                    var part = parts[i];
+                    bool isFile = (i == parts.Length - 1) && !string.IsNullOrEmpty(entry.Name);
+
+                    if (isFile && !includeFiles)
+                        break;
+
+                    if (!current.ContainsKey(part))
+                    {
+                        current[part] = isFile ? null : new Dictionary<string, object>();
+                    }
+
+                    if (!isFile)
+                        current = (Dictionary<string, object>)current[part];
                 }
             }
+
+            PrintTree(root, result, "", true);
             return result.ToString();
+        }
+
+        private static void PrintTree(Dictionary<string, object> node, StringBuilder sb, string indent, bool isLast)
+        {
+            var items = node.Keys.ToList();
+            for (int i = 0; i < items.Count; i++)
+            {
+                bool lastItem = i == items.Count - 1;
+                sb.AppendLine($"{indent}{(lastItem ? "└── " : "├── ")}{items[i]}");
+
+                if (node[items[i]] is Dictionary<string, object> subDir)
+                {
+                    PrintTree(subDir, sb, indent + (lastItem ? "    " : "│   "), lastItem);
+                }
+            }
         }
 
         // Récupère la liste des tags d'un objet (Documentation ou DocumentationFile)

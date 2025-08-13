@@ -21,11 +21,11 @@ namespace WEBAPI_m1IL_1.Controllers
 			this.userService = userService;
 		}
 
-		[HttpGet("create-user")]
+		[HttpPost("create-user")]
 		[Authorize]
-		public async Task<OutputUserDto> CreateUser(string username, string password, string email)
+		public async Task<OutputUserDto> CreateUser(InputUserDto inputUserDto)
 		{
-			var user = await userService.CreateUserAsync(username, email, password);
+			var user = await userService.CreateUserAsync(inputUserDto.Username, inputUserDto.EmailAddress, inputUserDto.Password);
 			return new OutputUserDto { Id = user.Id, EmailAddress = user.EmailAddress, Username = user.Username };
 		}
 
@@ -38,15 +38,15 @@ namespace WEBAPI_m1IL_1.Controllers
 			return new OutputUserDto { Id = user.Id, EmailAddress = user.EmailAddress, Username = user.Username };
 		}
 
-		[HttpGet("update-user")]
+		[HttpPatch("update-user")]
 		[Authorize]
-		public async Task<OutputUserDto> UpdateUser(string? username, string? password, string? email)
+		public async Task<OutputUserDto> UpdateUser(InputUpdateUserDto inputUpdateUserDto)
 		{
 			var user = userService.GetCurrentUserAsync();
-			return await userService.UpdateUser(username, password, email, user.Id);
+			return await userService.UpdateUser(inputUpdateUserDto.Username, inputUpdateUserDto.Password, inputUpdateUserDto.EmailAddress, user.Id);
 
 		}
-		[HttpGet("delete-user")]
+		[HttpDelete("delete-user")]
 		[Authorize]
 		public async Task<bool> DeleteUser(int userToDelete)
 		{
@@ -54,5 +54,4 @@ namespace WEBAPI_m1IL_1.Controllers
 			return await userService.DeleteUser(user.Id, userToDelete);
 		}
 	}
-
 }

@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using WEBAPI_m1IL_1.Services;
 using WEBAPI_m1IL_1.Utils;
 using WEBAPI_m1IL_1.DTO;
+using System.IO.Compression;
+using NuGet.Protocol.Core.Types;
 namespace WEBAPI_m1IL_1.Controllers
 {
     [ApiController]
@@ -37,7 +39,6 @@ namespace WEBAPI_m1IL_1.Controllers
         {
             try
             {
-
                 if (zipFile.ZipFile == null || zipFile.ZipFile.Length == 0)
                     return BadRequest("Le fichier ZIP est requis");
                 // Validation des paramètres
@@ -49,17 +50,8 @@ namespace WEBAPI_m1IL_1.Controllers
                 var user = await userService.GetCurrentUserAsync();
                 if (user == null)
                     return Unauthorized("Utilisateur non authentifié");
-
-                // Création des répertoires nécessaires
-                var pathGuid = SampleUtils.GenerateUUID();
-                var docsPath = "C:/docs/" + pathGuid.ToString();
-                // Extraction et traitement
-                await FilesUtils.DezipFolderAndFilter(docsPath, zipFile.ZipFile);
                 // Import du document
-                var result = await documentService.ImportDocument(user.Id, docsPath, zipFile.Title, zipFile.Description, zipFile.IsPublic, zipFile.Tags);
-
-                // Ajout des permissions
-                await rigthAccessService.AddFirstUserToDocumentation(user.Id, result.Id);
+                var result = await documentService.ImportDocument(user.Id, zipFile.Title, zipFile.Description, zipFile.IsPublic, zipFile.Tags, zipFile.ZipFile);
 
                 return Ok(new { documentId = result.Id, message = "Document importé avec succès" });
             }
@@ -87,41 +79,29 @@ namespace WEBAPI_m1IL_1.Controllers
 
         [HttpPost("UploadFile")]
         [Authorize]
-        public async Task<IActionResult> UploadSingleFile(IFormFile file, bool isPublic, string title, string description, string tags)
+        public async Task<IActionResult> UploadSingleFile(IFormFile file,int DocumentId,string path)
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("Aucun fichier envoyé.");
-
-            if (string.IsNullOrWhiteSpace(title))
-                return BadRequest("Le titre est requis.");
-
-            if (string.IsNullOrWhiteSpace(description))
-                return BadRequest("La description est requise.");
-
             try
             {
                 var user = await userService.GetCurrentUserAsync();
                 if (user == null)
                     return Unauthorized("Utilisateur non authentifié.");
 
-                // Créer les répertoires s'ils n'existent pas
-                var docsPath = "C:/docs";
-                if (!Directory.Exists(docsPath))
-                    Directory.CreateDirectory(docsPath);
-
-                var path = Path.Combine(docsPath, SampleUtils.GenerateUUID());
-                Directory.CreateDirectory(path);
-
-                // Sauvegarder le fichier
-                var filePath = Path.Combine(path, file.FileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+               // CreateDocumentFile(int documentId, string path, bool isFolder, int userId, Stream fileStream, string ext)
+                using var zipStream = file.OpenReadStream();
+                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
                 {
-                    await file.CopyToAsync(stream);
+                    foreach (var entry in archive.Entries)
+                    {
+                        var ext = Path.GetExtension(entry.FullName).ToLowerInvariant();
+                        using var entryStream = entry.Open();
+                        var objectName = Path.Combine(path, entry.FullName)
+                        .Replace("\\", "/");
+                        await documentationFileService.CreateDocumentFile(DocumentId, path, false, user.Id, entryStream, ext);
+                    }
                 }
 
-                var result = await documentService.ImportDocument(user.Id, path, title, description, isPublic, tags);
-
-                return Ok(new { message = "Fichier uploadé avec succès", path = filePath, documentId = result.Id });
+                return Ok(new { message = "Fichier uploadé avec succès"});
             }
             catch (UnauthorizedAccessException)
             {
@@ -147,25 +127,27 @@ namespace WEBAPI_m1IL_1.Controllers
 
         [HttpGet("download-documentFile")]
         [Authorize]
-        public async Task<IActionResult> DownloadMarkdown(int documentId, int documentFileId)
+        public async Task<string> DownloadMarkdown(int documentId, int documentFileId)
         {
             var user = await userService.GetCurrentUserAsync();
             var documentFile = await documentationFileService.FindDocumentFileByDocumentIdAndDocumentFileId(user.Id, documentId, documentFileId);
-            var fileName = Path.GetFileName(documentFile.FullPath);
-            var content = await System.IO.File.ReadAllTextAsync(documentFile.FullPath);
-            return File(System.Text.Encoding.UTF8.GetBytes(content), "text/markdown", fileName);
+            return documentFile.FullPath;
         }
 
         [HttpGet("download-documentation")]
         [Authorize]
-        public async Task<IActionResult> DownloadMarkdown(int documentId)
+        public async Task<ActionResult<List<string>>> DownloadMarkdown(int documentId)
         {
             var user = await userService.GetCurrentUserAsync();
-            var document = await documentService.FindDocumentById(user.Id, documentId);
+            var documentFiles = await documentationFileService.GetAllFilesByDocumentId(user.Id,documentId);
+            List<string> filePaths = new List<string>();
             try
             {
-                var content = await System.IO.File.ReadAllTextAsync(document.RootPath);
-                return File(System.Text.Encoding.UTF8.GetBytes(content), "text/markdown", "document.md");
+                foreach (var item in documentFiles)
+                {
+                    filePaths.Add(item.FullPath);
+                }
+                return filePaths;
             }
             catch (Exception ex)
             {
@@ -175,10 +157,10 @@ namespace WEBAPI_m1IL_1.Controllers
 
         [HttpGet("SearchByPrompt")]
         [Authorize]
-        public async Task<string> FindInDocumentationByPrompt(string prompt, string? model)
+        public async Task<string> FindInDocumentationByPrompt(InputFindInPrompt inputFindInPrompt)
         {
             var user = await userService.GetCurrentUserAsync();
-            return await documentService.SearchByPrompt(user.Id, prompt, model);
+            return await documentService.SearchByPrompt(user.Id, inputFindInPrompt.Prompt, inputFindInPrompt.Model);
         }
 
         [HttpGet("SearchByTag")]

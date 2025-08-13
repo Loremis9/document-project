@@ -13,6 +13,8 @@ using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Diagnostics;
 using WEBAPI_m1IL_1.Config;
 using WEBAPI_m1IL_1.Utils;
+using Minio.DataModel.Args;
+using Minio;
 
 var configCompose = new ConfigCompose();
 configCompose.SetupAndRun();
@@ -53,8 +55,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateIssuer = false,
+            ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
@@ -110,6 +112,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSingleton<LuceneSearchService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpClient<AIService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(5);
@@ -152,6 +155,30 @@ app.Lifetime.ApplicationStarted.Register(async () =>
         Console.WriteLine($"❌ Erreur lors de la génération de swagger.yaml : {ex.Message}");
     }
 });
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DocumentationDbContext>();
+    db.Database.Migrate();
+    if (!db.Users.Any())
+    {
+        db.Users.AddRange(
+            new UserModel
+            {
+                Username = "jason_admin",
+                EmailAddress = "jason.admin@email.com",
+                Password = "MyPass_w0rd"
+            },
+            new UserModel
+            {
+                Username = "elyse_seller",
+                EmailAddress = "elyse.seller@email.com",
+                Password = "MyPass_w0rd"
+            }
+        );
+        db.SaveChanges();
+    }
+}
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

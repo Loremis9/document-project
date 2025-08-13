@@ -31,10 +31,10 @@ services:
     image: minio/minio:latest
     container_name: minio
     ports:
-      - "9090:9090"
+      - "{{MinIo.Port}}:9090"
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: password123
+      MINIO_ROOT_USER: {{MinIo.AccessKey}}
+      MINIO_ROOT_PASSWORD: {{MinIo.SecretKey}}
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9090"

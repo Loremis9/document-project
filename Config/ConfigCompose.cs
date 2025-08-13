@@ -12,6 +12,7 @@ namespace WEBAPI_m1IL_1.Config
     {
         public List<OllamaContainer> Containers { get; set; } = new();
         public PostgresTemplateModel Postgres { get; set; } = new();
+        public MinIoTemplateModel MinIo { get; set; } = new();
         public ConfigCompose() { }
 
         public void SetupAndRun()
@@ -24,6 +25,7 @@ namespace WEBAPI_m1IL_1.Config
 
             var containers = config.GetSection("Ollama:Containers").Get<List<OllamaContainer>>();
             var postgres = config.GetSection("Postgres").Get<PostgresTemplateModel>();
+            var minIO = config.GetSection("MinIO").Get<MinIoTemplateModel>();
             if (containers == null || containers.Count == 0)
             {
                 Console.WriteLine("❌ Aucun conteneur trouvé.");
@@ -50,6 +52,7 @@ namespace WEBAPI_m1IL_1.Config
             {
                 Containers = containers,
                 Postgres = postgres,
+                MinIO = minIO
             };
 
             var result = templateHandlebars(data);

@@ -50,6 +50,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Aspose.Note": {
+              "target": "Package",
+              "version": "[25.6.0, )"
+            },
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
             "Csv": {
               "target": "Package",
               "version": "[2.0.170, )"
@@ -107,6 +115,10 @@
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
               "version": "[8.0.7, )"
+            },
+            "Minio": {
+              "target": "Package",
+              "version": "[6.0.5, )"
             },
             "NPOI": {
               "target": "Package",

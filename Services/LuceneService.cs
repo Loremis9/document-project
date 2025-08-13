@@ -43,7 +43,7 @@ namespace WEBAPI_m1IL_1.Services
             writer.AddDocument(document);
             writer.Commit();
         }
-        public void IndexDocumentFile(DocumentationFile documentFile, string path)
+        public void IndexDocumentFile(DocumentationFile documentFile, string content)
         {
             var indexConfig = new IndexWriterConfig(_version, _analyzer);
             using var writer = new IndexWriter(_directory, new IndexWriterConfig(LuceneVersion.LUCENE_48, _analyzer));
@@ -51,7 +51,7 @@ namespace WEBAPI_m1IL_1.Services
             // Supprimer les anciens chunks liés à ce docId
             writer.DeleteDocuments(new Term("documentFileId", documentFile.Id.ToString()));
             var chunkNumber = 0;
-            foreach (var chunk in SampleUtils.ChunkString(FilesUtils.ReadFile(path), maxChunkSize))
+            foreach (var chunk in SampleUtils.ChunkString(content, maxChunkSize))
             {
                 var doc = new Document
                     {

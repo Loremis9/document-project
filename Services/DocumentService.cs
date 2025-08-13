@@ -4,7 +4,7 @@ using WEBAPI_m1IL_1.Models;
 using WEBAPI_m1IL_1.Utils;
 using WEBAPI_m1IL_1.DTO;
 using System.Text;
-
+using System.IO.Compression;
 namespace WEBAPI_m1IL_1.Services
 {
     public class DocumentService
@@ -15,9 +15,9 @@ namespace WEBAPI_m1IL_1.Services
         private DocumentFilesService documentationFileService;
         private AIService aiService;
         private UserService userService;
-
+        private MinIoService _minIOService;
         public DocumentService(DocumentationDbContext context, RigthAccessService rigthAccessService,
-        LuceneSearchService luceneService, DocumentFilesService documentationFileService, AIService aiService, UserService userService)
+        LuceneSearchService luceneService, DocumentFilesService documentationFileService, AIService aiService, UserService userService,MinIoService minIoService)
         {
             _context = context;
             this.rigthAccessService = rigthAccessService;
@@ -25,6 +25,7 @@ namespace WEBAPI_m1IL_1.Services
             this.documentationFileService = documentationFileService;
             this.aiService = aiService;
             this.userService = userService;
+            _minIOService = minIoService;
 
         }
 
@@ -44,7 +45,7 @@ namespace WEBAPI_m1IL_1.Services
                 RootPath = path,
                 Tags = tags
             };
-
+            _minIOService.CreateDirectory(path);
 
             await _context.Documentations.AddAsync(document);
             await _context.SaveChangesAsync(); // Ici, document.Id est rempli par EF Core
@@ -56,38 +57,54 @@ namespace WEBAPI_m1IL_1.Services
             return document;
         }
 
-        public async Task<OutputDocument> ImportDocument(int userId, string path, string title, string description, bool isPublic, string tags)
+        public async Task<OutputDocument> ImportDocument(int userId, string title, string description, bool isPublic, string tags, IFormFile zipFile)
         {
+            var forbiddenExtensions = new[] { ".exe", ".bat", ".cmd", ".js", ".ps1", ".vbs", ".com", ".scr", ".pif", ".jar", ".msi", ".dll", ".sys" };
+            var path = "docs/" + SampleUtils.GenerateUUID().ToString();
             try
             {
                 // Crée le document
                 var document = await CreateDocument(title, description, isPublic, userId, path, tags);
 
-                // Scan fichiers
-                var tree = SampleUtils.GetDirectoryTree(path, includeFiles: true);
-                var docs = ScannerUtils.ScanDirectory(path);
 
-                // Crée les entrées pour chaque fichier
-                foreach (var doc in docs)
+                bool IsDirectory = false;
+                using var zipStream = zipFile.OpenReadStream();
+                string tree = SampleUtils.GetDirectoryTreeFromZipStream(zipStream, includeFiles: true);
+
+                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
                 {
-
-                    var documentFile = await documentationFileService.CreateDocumentFile(document.Id, doc.Path, doc.IsDirectory, userId);
-                    if (!doc.IsDirectory)
+                    foreach (var entry in archive.Entries)
                     {
-                        var content = await File.ReadAllTextAsync(doc.Path); // async
+                        if (string.IsNullOrEmpty(entry.Name))
+                        {
+                            IsDirectory = true;
+
+                        }
+                        else
+                        {
+                            IsDirectory = false;
+                        }
+
+                        var ext = Path.GetExtension(entry.FullName).ToLowerInvariant();
+
+                        if (forbiddenExtensions.Contains(ext))
+                            continue;
+                        using var entryStream = entry.Open();
+                        var objectName = Path.Combine(path, entry.FullName)
+                        .Replace("\\", "/");
+                        var documentFile = await documentationFileService.CreateDocumentFile(document.Id, path, IsDirectory, userId, entryStream, ext);
                     }
+                    // Index le document global après succès complet
+                    luceneService.IndexDocument(document);
+
+                    return new OutputDocument
+                    {
+                        Id = document.Id,
+                        Title = document.Title,
+                        Tags = document.Tags,
+                        Tree = tree
+                    };
                 }
-
-                // Index le document global après succès complet
-                luceneService.IndexDocument(document);
-
-                return new OutputDocument
-                {
-                    Id = document.Id,
-                    Title = document.Title,
-                    Tags = document.Tags,
-                    Tree = tree
-                };
             }
             catch (Exception ex)
             {
