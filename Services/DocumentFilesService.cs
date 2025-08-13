@@ -71,7 +71,7 @@ namespace WEBAPI_m1IL_1.Services
                         contentMarkDown = string.Join("\n", convertedChunks);
 
                         var markdownPath = Path.ChangeExtension(path, ".md");
-                        documentFile.FullPath = path;
+                        documentFile.FullPath = markdownPath;
                         documentFile.IsFolder = isFolder;
                         documentFile.DocumentationId = documentId;
                         documentFile.Tags = tags;

@@ -123,11 +123,8 @@ namespace WEBAPI_m1IL_1.Services
             { "x-amz-meta-description", FilesUtils.ToAscii(documentFile.Description) },
             { "x-amz-meta-tags", FilesUtils.ToAscii(documentFile.Tags) }
         };
-            Console.WriteLine($"Uploading document file: {documentFile.FullPath} with metadata:{documentFile.Tags} ");
             byte[] contentBytes = Encoding.UTF8.GetBytes(content);
             using var memoryStream = new MemoryStream(contentBytes);
-            // Upload direct vers MinIO
-            Console.WriteLine($"debug");
             try
             {
                 await _minio.PutObjectAsync(new PutObjectArgs()

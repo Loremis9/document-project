@@ -1,4 +1,10 @@
-﻿ce projet permet de pouvoir transformer completer de la documentation technique et faire des recherche via une AI sur celle ci en toute confidentialité car tout est en local est sécurisé.
+﻿## ATTENTION : cette api est en cours d'implémentation il n'y a pas de tests unitaire et certains endpoint ne fonctionne pas correctement, elle sera améliorer au fur et à mesure.
+les fichiers suivants importé seront systématiquement détruit : ".exe", ".bat", ".cmd", ".js", ".ps1", ".vbs", ".com", ".scr", ".pif", ".jar", ".msi", ".dll", ".sys"
+les vidéos ne sont pas pris en compte pour l'instant.
+importé un documentation et très long un seul fichier .txt de 300 lignes met 10 secs
+point positif : le docker-compose généré par l'api fonctionne très bien.
+ 
+ce projet permet de pouvoir transformer completer de la documentation technique et faire des recherche via une AI sur celle ci en toute confidentialité car tout est en local est sécurisé.
 Pour changer le modèle il suffit de changer le nom du modèle dans le fichier appsettings.json voici un panorama des modèles disponibles : https://ollama.com/models
 # 🧠 Panorama des modèles disponibles dans Ollama
 
@@ -84,16 +90,14 @@ Une 3070 serait parfaite pour faire tourner les modèles de 7b et 13b.
 for windows download cuda driver for use GPU :  https://developer.nvidia.com/cuda-downloads
 
 ### Changement du modèle
-pour tout changement du modèle il suffit de changer le nom du modèle dans le fichier /script/entrypoint.sh
-et aussi de changer les ressources cpu et ram dans le fichier appsettings.json (il faut aller voir combien de ressource votre modèle consomme sur le site d'ollama)
-on peut aussi avoir plusieurs AI
+pour tout changement du modèle il suffit de changer le nom du modèle dans le fichier appsettings.json vous pouvez ajouter autant d'ai que souhaiter mais attention à la consommation de ram et cpu, il suffit d'ajouter un nouveau model dans le tableau en reprenant le model (il faut aller voir combien de ressource votre modèle consomme sur le site d'ollama)
 ### Prérequis
 docker compose up
-le modele peut mettre assez longtemps à charger 5-10 mn
+le modele peut mettre assez longtemps à charger 5-10 mn selon les ordinateurs que vous avez  si c'est sur un gros serveur cela peut prendre moins de 30 secondes.
 
 ### Lancement du serveur
  dotnet run --launch-profile https
 
  ----
- La v1 est terminé le probleme est l'accès au fichier dans minIO qui n'est pas sécurisé,
- à la place de renvoyer des liens publics il faudrait renvoyer des liens signés ou alors protégers le liens avec un token d'accès qui serait derriere un nginx ce qui permettrait d'autorisé que ceux qui uy sont autorisé.
+ La v1 est pratiquement terminé, il faut que je test en long et en large les endpoint et que je resolve le probleme de l'accès au fichier dans minIO qui n'est pas sécurisé,
+ à la place de renvoyer des liens publics il faudrait renvoyer des liens signés ou alors protégers le liens avec un token d'accès qui serait derriere un nginx ce qui permettrait d'autorisé que ceux qui y sont autorisé.
