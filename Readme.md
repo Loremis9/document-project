@@ -94,3 +94,6 @@ le modele peut mettre assez longtemps à charger 5-10 mn
 ### Lancement du serveur
  dotnet run --launch-profile https
 
+ ----
+ La v1 est terminé le probleme est l'accès au fichier dans minIO qui n'est pas sécurisé,
+ à la place de renvoyer des liens publics il faudrait renvoyer des liens signés ou alors protégers le liens avec un token d'accès qui serait derriere un nginx ce qui permettrait d'autorisé que ceux qui uy sont autorisé.
