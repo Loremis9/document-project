@@ -198,5 +198,14 @@ namespace WEBAPI_m1IL_1.Utils
                 throw new IOException("Erreur d'entrée/sortie lors du traitement du fichier.", ex);
             }
         }
+        public static string ToAscii(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return "";
+
+            // Remove non-ASCII characters
+            var asciiBytes = Encoding.ASCII.GetBytes(input);
+            return Encoding.ASCII.GetString(asciiBytes);
+        }
     }
 }

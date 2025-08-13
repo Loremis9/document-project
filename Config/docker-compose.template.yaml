@@ -31,7 +31,8 @@ services:
     image: minio/minio:latest
     container_name: minio
     ports:
-      - "{{MinIo.Port}}:9090"
+      - "{{MinIo.PortApi}}:9000"
+      - "{{MinIo.PortConsole}}:9090"
     environment:
       MINIO_ROOT_USER: {{MinIo.AccessKey}}
       MINIO_ROOT_PASSWORD: {{MinIo.SecretKey}}

@@ -16,6 +16,42 @@
         <member name="M:WEBAPI_m1IL_1.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:WEBAPI_m1IL_1.Migrations.updateFiles">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations.updateFiles.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations.updateFiles.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations.updateFiles.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:WEBAPI_m1IL_1.Migrations._130825">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations._130825.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations._130825.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations._130825.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:WEBAPI_m1IL_1.Migrations.FixDescriptionColumnName">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations.FixDescriptionColumnName.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations.FixDescriptionColumnName.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:WEBAPI_m1IL_1.Migrations.FixDescriptionColumnName.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="M:WEBAPI_m1IL_1.Services.MinIoService.UploadImageAsync(WEBAPI_m1IL_1.Models.DocumentationFile,System.Byte[])">
             <summary>
             Upload une image avec tags et description

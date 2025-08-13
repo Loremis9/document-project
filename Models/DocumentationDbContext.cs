@@ -27,6 +27,11 @@ namespace WEBAPI_m1IL_1.Models
             modelBuilder.Entity<UserPermission>()
             .HasIndex(up => new { up.UserId, up.DocumentationId })
             .IsUnique();
+            modelBuilder.Entity<DocumentationFile>(entity =>
+            {
+                entity.Property(e => e.Description)
+                    .HasColumnName("Description"); 
+            });
         }
     }
 }

@@ -117,7 +117,11 @@ builder.Services.AddHttpClient<AIService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(5);
 });
-
+builder.Services.AddScoped<RigthAccessService>();
+builder.Services.AddScoped<DocumentFilesService>();
+builder.Services.AddScoped<DocumentService>();
+builder.Services.AddScoped<MinIoService>();
+builder.Services.AddScoped<ConvertToMarkdownService>();
 var app = builder.Build();
 app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.  

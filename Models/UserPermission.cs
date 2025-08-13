@@ -16,6 +16,6 @@
         public bool IsAdmin { get; set; }
         
         // Métadonnées
-        public DateTime GrantedDate { get; set; } = DateTime.Now;
+        public DateTime GrantedDate { get; set; } = DateTime.UtcNow;
     }
 }

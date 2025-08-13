@@ -29,6 +29,7 @@ services:
     image: minio/minio:latest
     container_name: minio
     ports:
+      - "9000:9000"
       - "9090:9090"
     environment:
       MINIO_ROOT_USER: minioadmin

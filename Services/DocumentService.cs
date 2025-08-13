@@ -69,9 +69,13 @@ namespace WEBAPI_m1IL_1.Services
 
                 bool IsDirectory = false;
                 using var zipStream = zipFile.OpenReadStream();
-                string tree = SampleUtils.GetDirectoryTreeFromZipStream(zipStream, includeFiles: true);
-
-                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
+                using var ms = new MemoryStream();
+                await zipStream.CopyToAsync(ms);
+                ms.Position = 0;
+                //string tree = SampleUtils.GetDirectoryTreeFromZipStream(ms, includeFiles: true);
+                string tree = "";
+                ms.Position = 0;
+                using (var archive = new ZipArchive(ms, ZipArchiveMode.Read, leaveOpen: true))
                 {
                     foreach (var entry in archive.Entries)
                     {
@@ -84,9 +88,9 @@ namespace WEBAPI_m1IL_1.Services
                         {
                             IsDirectory = false;
                         }
-
+                        
                         var ext = Path.GetExtension(entry.FullName).ToLowerInvariant();
-
+                        
                         if (forbiddenExtensions.Contains(ext))
                             continue;
                         using var entryStream = entry.Open();
@@ -94,6 +98,7 @@ namespace WEBAPI_m1IL_1.Services
                         .Replace("\\", "/");
                         var documentFile = await documentationFileService.CreateDocumentFile(document.Id, path, IsDirectory, userId, entryStream, ext);
                     }
+                    
                     // Index le document global après succès complet
                     luceneService.IndexDocument(document);
 

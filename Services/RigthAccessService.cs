@@ -39,6 +39,7 @@ namespace WEBAPI_m1IL_1.Services
                CanWrite = true,
                CanDelete = true,
                IsAdmin = true
+
            };
             await _context.UserPermissions.AddAsync(permission);
             await _context.SaveChangesAsync();

@@ -62,7 +62,7 @@ namespace WEBAPI_m1IL_1.Services
                     ".one" => await ConvertToMarkdown(await OneToPdf(content,imagePath)),
                     _ => await ConvertToMarkdown(new DocumentContent
                     {
-                        Elements = { new DocumentElement { Type = ElementType.Text, Content = File.ReadAllText(content) } }
+                        Elements = { new DocumentElement { Type = ElementType.Text, Content = content } }
                     })
                 };
         }

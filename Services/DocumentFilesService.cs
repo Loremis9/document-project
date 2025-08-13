@@ -59,11 +59,9 @@ namespace WEBAPI_m1IL_1.Services
                     }
                     else
                     {
-                    
                         var content = await _convertToMarkdownService.ExtractFromFile(fileStream, documentId,ext,path);
                         // Tags générés par l'IA
                         var tags = await aiService.AskAi(userId, content, "tag", SampleUtils.GenerateUUID());
-
                         // Découpe et conversion en parallèle
                         var chunks = SampleUtils.ChunkString(content, 10000);
                         var convertTasks = chunks.Select(chunk => aiService.AskAi(userId, chunk, "convert", contextRequest));
@@ -71,12 +69,14 @@ namespace WEBAPI_m1IL_1.Services
                         //chunck aussi les decription et ensuite demander à l'ai de synthétiser
                         var description = await aiService.AskAi(userId, content, "description", contextRequest);
                         contentMarkDown = string.Join("\n", convertedChunks);
+
                         var markdownPath = Path.ChangeExtension(path, ".md");
                         documentFile.FullPath = path;
                         documentFile.IsFolder = isFolder;
                         documentFile.DocumentationId = documentId;
                         documentFile.Tags = tags;
-                        documentFile.Description = description;
+                        documentFile.Description = string.IsNullOrEmpty(description) ? "toto" : description;
+
                         var pathFile =  await  _minIoService.UploadDocumentFileAsync(documentFile, contentMarkDown);
                         documentFile.FullPath = pathFile;
                     }

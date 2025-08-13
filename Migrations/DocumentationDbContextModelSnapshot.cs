@@ -62,6 +62,11 @@ namespace WEBAPI_m1IL_1.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Description");
+
                     b.Property<int>("DocumentationId")
                         .HasColumnType("integer");
 
@@ -73,10 +78,6 @@ namespace WEBAPI_m1IL_1.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("description")
                         .IsRequired()
                         .HasColumnType("text");
 

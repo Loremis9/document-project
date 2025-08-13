@@ -35,22 +35,24 @@ namespace WEBAPI_m1IL_1.Services
         private string accessKey;
         private string secretKey;
         private string publicUrl;
+        private int port;
 
         public MinIoService(AIService aiService, IConfiguration configuration)
         {
-            _minio = new MinioClient()
-                .WithEndpoint(serviceUrl)
-                .WithCredentials(accessKey, secretKey)
-                .Build();
-            _bucketName = bucketName;
             _aiService = aiService;
             _config = configuration;
-
-            bucketName = _config["MinIo:documentation"];
+            _bucketName = _config["MinIo:bucket"];
             serviceUrl = _config["MinIo:endpoint"];
             accessKey = _config["MinIo:accessKey"];
             secretKey = _config["MinIo:secretkey"];
+            port = int.Parse(_config["MinIo:portApi"]);
             publicUrl = _config["MinIo:publicBaseUrl"];
+            _minio = new MinioClient()
+               .WithEndpoint(serviceUrl,port)
+               .WithCredentials(accessKey, secretKey)
+               .Build();
+
+
         }
 
         public async Task InitializeBucketAsync()
@@ -67,12 +69,13 @@ namespace WEBAPI_m1IL_1.Services
         /// </summary>
         public async Task<string> UploadImageAsync(DocumentationFile documentFile, byte[] content)
         {
+            await InitializeBucketAsync();
             using var ms = new MemoryStream(content); // imageBytes = ton byte[]
 
 
             var metadata = new Dictionary<string, string> {
-                { "x-amz-meta-description", documentFile.Description },
-                {"x-amz-meta-tags", documentFile.Tags }
+                { "x-amz-meta-description", FilesUtils.ToAscii(documentFile.Description) },
+                {"x-amz-meta-tags", FilesUtils.ToAscii(documentFile.Tags) }
             };
             // Upload avec métadonnée description
             await _minio.PutObjectAsync(new PutObjectArgs()
@@ -90,6 +93,7 @@ namespace WEBAPI_m1IL_1.Services
 
         public async Task<ResponseAskAiImage> UploadImageAskAiAsync(string path,string ext,byte[] content)
         {
+            await InitializeBucketAsync();
             using var ms = new MemoryStream(content); // imageBytes = ton byte[]
             string text = System.Text.Encoding.UTF8.GetString(content);
             var images = JsonHelper.ExtractMetadata(await _aiService.AskDescriptionImageToAi(text, SampleUtils.GenerateUUID()));
@@ -113,17 +117,20 @@ namespace WEBAPI_m1IL_1.Services
 
         public async Task<string> UploadDocumentFileAsync(DocumentationFile documentFile,string content)
         {
-
+            await InitializeBucketAsync();
             // Métadonnées associées
             var metadata = new Dictionary<string, string> {
-            { "x-amz-meta-description", documentFile.Description },
-            { "x-amz-meta-tags", documentFile.Tags }
+            { "x-amz-meta-description", FilesUtils.ToAscii(documentFile.Description) },
+            { "x-amz-meta-tags", FilesUtils.ToAscii(documentFile.Tags) }
         };
-
+            Console.WriteLine($"Uploading document file: {documentFile.FullPath} with metadata:{documentFile.Tags} ");
             byte[] contentBytes = Encoding.UTF8.GetBytes(content);
             using var memoryStream = new MemoryStream(contentBytes);
             // Upload direct vers MinIO
-            await _minio.PutObjectAsync(new PutObjectArgs()
+            Console.WriteLine($"debug");
+            try
+            {
+                await _minio.PutObjectAsync(new PutObjectArgs()
                 .WithBucket(_bucketName)
                 .WithObject(documentFile.FullPath)
                 .WithStreamData(memoryStream)
@@ -131,12 +138,20 @@ namespace WEBAPI_m1IL_1.Services
                 .WithContentType("text/markdown")
                 .WithHeaders(metadata)
             );
+                return $"{serviceUrl}/{_bucketName}/{Uri.EscapeDataString(documentFile.FullPath)}";
 
-            return $"{serviceUrl}/{_bucketName}/{Uri.EscapeDataString(documentFile.FullPath)}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de l’upload vers MinIO : {ex.Message}");
+                throw;
+            }
+            
         }
 
         public async Task<string> CreateDirectory(string path)
         {
+            await InitializeBucketAsync();
             await _minio.PutObjectAsync(new PutObjectArgs()
                 .WithBucket(_bucketName)
                 .WithObject(path) // slash final

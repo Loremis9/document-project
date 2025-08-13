@@ -330,4 +330,3 @@ C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.IO.Hash
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\System.Reactive.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\Users\axelt\project\document\document-project\bin\Debug\net8.0\Aspose.Note.dll
-C:\Users\axelt\project\document\document-project\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
